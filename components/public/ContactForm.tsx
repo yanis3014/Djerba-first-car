@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import type { ContactFormState } from "@/lib/actions/contact";
 import { submitContactMessage } from "@/lib/actions/contact";
+import { HoneypotField } from "@/components/public/HoneypotField";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,7 +14,7 @@ export function ContactForm() {
 
   return (
     <form
-      className="space-y-3"
+      className="relative space-y-3"
       action={(formData) => {
         startTransition(async () => {
           const result = await submitContactMessage(undefined, formData);
@@ -31,6 +32,8 @@ export function ContactForm() {
           {state.error}
         </p>
       ) : null}
+
+      <HoneypotField />
 
       <Input name="name" required placeholder="Nom complet" autoComplete="name" disabled={pending} />
       <Input name="phone" type="tel" placeholder="Téléphone" autoComplete="tel" disabled={pending} />

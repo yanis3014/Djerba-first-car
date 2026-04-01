@@ -7,3 +7,8 @@ export function slugify(input: string): string {
     .replace(/^-+|-+$/g, "");
   return s || "vehicule";
 }
+
+/** Slug URL saisi par l’admin (espaces / underscores → tirets, puis slugify). */
+export function normalizeSlugInput(input: string): string {
+  return slugify(input.replace(/[\s_]+/g, "-"));
+}

@@ -7,7 +7,7 @@ export default function AdminNouvelleVoiturePage() {
         <h1 className="font-[var(--font-display)] text-3xl text-[var(--color-text)]">Nouvelle voiture</h1>
         <p className="mt-1 text-sm text-[var(--color-muted)]">Créez une fiche ; vous pourrez la modifier ensuite.</p>
       </div>
-      <VehicleForm />
+      <VehicleForm key="nouvelle" />
     </div>
   );
 }

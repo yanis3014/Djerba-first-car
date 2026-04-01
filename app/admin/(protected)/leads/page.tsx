@@ -1,3 +1,4 @@
+import { LeadStatusSelect } from "@/components/admin/LeadStatusSelect";
 import { createSupabaseServerClient } from "@/lib/supabase";
 import type { Lead } from "@/lib/types";
 
@@ -6,12 +7,6 @@ const typeLabel: Record<string, string> = {
   sell: "Vente",
   exchange: "Échange",
   info: "Infos",
-};
-
-const statusLabel: Record<string, string> = {
-  new: "Nouveau",
-  contacted: "Contacté",
-  closed: "Clôturé",
 };
 
 export default async function AdminLeadsPage() {
@@ -68,7 +63,9 @@ export default async function AdminLeadsPage() {
                   </a>
                 </td>
                 <td className="px-4 py-3">{typeLabel[lead.type] ?? lead.type}</td>
-                <td className="px-4 py-3">{statusLabel[lead.status] ?? lead.status}</td>
+                <td className="px-4 py-3">
+                  <LeadStatusSelect id={lead.id} status={lead.status} />
+                </td>
                 <td className="max-w-xs truncate px-4 py-3 text-[var(--color-muted)]" title={lead.message ?? ""}>
                   {lead.message ?? "—"}
                 </td>

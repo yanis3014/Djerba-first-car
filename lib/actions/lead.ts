@@ -1,6 +1,8 @@
 "use server";
 
 import { z } from "zod";
+import { notifyNewLeadEmail } from "@/lib/email/notify";
+import { allowPublicFormSubmission, isHoneypotTriggered } from "@/lib/public-form-guard";
 import { createSupabaseServerClient } from "@/lib/supabase";
 
 const schema = z.object({
@@ -17,6 +19,15 @@ const schema = z.object({
 export type LeadFormState = { ok: true } | { ok: false; error: string };
 
 export async function submitLeadForCar(_prev: LeadFormState | undefined, formData: FormData): Promise<LeadFormState> {
+  if (isHoneypotTriggered(formData)) {
+    return { ok: true };
+  }
+
+  const rate = await allowPublicFormSubmission();
+  if (!rate.ok) {
+    return { ok: false, error: "Trop de requêtes. Réessayez dans une minute." };
+  }
+
   const raw = {
     car_id: formData.get("car_id")?.toString() ?? "",
     name: formData.get("name")?.toString() ?? "",
@@ -36,6 +47,10 @@ export async function submitLeadForCar(_prev: LeadFormState | undefined, formDat
 
   const v = parsed.data;
   const supabase = createSupabaseServerClient();
+
+  const { data: carRow } = await supabase.from("cars").select("brand, model").eq("id", v.car_id).maybeSingle();
+  const carLabel = carRow ? `${carRow.brand} ${carRow.model}` : "Véhicule";
+
   const { error } = await supabase.from("leads").insert({
     car_id: v.car_id,
     name: v.name,
@@ -49,6 +64,18 @@ export async function submitLeadForCar(_prev: LeadFormState | undefined, formDat
 
   if (error) {
     return { ok: false, error: error.message };
+  }
+
+  try {
+    await notifyNewLeadEmail({
+      name: v.name,
+      phone: v.phone,
+      email: v.email?.trim() || null,
+      message: v.message || null,
+      carLabel,
+    });
+  } catch {
+    /* email optionnel */
   }
 
   return { ok: true };

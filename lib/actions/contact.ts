@@ -1,6 +1,8 @@
 "use server";
 
 import { z } from "zod";
+import { notifyContactMessageEmail } from "@/lib/email/notify";
+import { allowPublicFormSubmission, isHoneypotTriggered } from "@/lib/public-form-guard";
 import { createSupabaseServerClient } from "@/lib/supabase";
 
 const schema = z.object({
@@ -17,6 +19,15 @@ const schema = z.object({
 export type ContactFormState = { ok: true } | { ok: false; error: string };
 
 export async function submitContactMessage(_prev: ContactFormState | undefined, formData: FormData): Promise<ContactFormState> {
+  if (isHoneypotTriggered(formData)) {
+    return { ok: true };
+  }
+
+  const rate = await allowPublicFormSubmission();
+  if (!rate.ok) {
+    return { ok: false, error: "Trop de requêtes. Réessayez dans une minute." };
+  }
+
   const raw = {
     name: formData.get("name")?.toString() ?? "",
     phone: formData.get("phone")?.toString() ?? "",
@@ -47,6 +58,18 @@ export async function submitContactMessage(_prev: ContactFormState | undefined, 
 
   if (error) {
     return { ok: false, error: error.message };
+  }
+
+  try {
+    await notifyContactMessageEmail({
+      name: v.name,
+      phone: v.phone?.trim() || null,
+      email: v.email?.trim() || null,
+      subject: v.subject || null,
+      message: v.message,
+    });
+  } catch {
+    /* email optionnel */
   }
 
   return { ok: true };

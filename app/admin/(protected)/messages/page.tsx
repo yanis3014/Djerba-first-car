@@ -1,3 +1,4 @@
+import { markMessageAsRead } from "@/lib/admin/crm-actions";
 import { createSupabaseServerClient } from "@/lib/supabase";
 import type { Message } from "@/lib/types";
 
@@ -38,9 +39,23 @@ export default async function AdminMessagesPage() {
               !msg.is_read ? "ring-1 ring-[var(--color-accent)]/30" : ""
             }`}
           >
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <span className="font-medium text-[var(--color-text)]">{msg.name}</span>
-              <time className="text-xs text-[var(--color-muted)]">{new Date(msg.created_at).toLocaleString("fr-FR")}</time>
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <span className="font-medium text-[var(--color-text)]">{msg.name}</span>
+                <time className="mt-1 block text-xs text-[var(--color-muted)]">
+                  {new Date(msg.created_at).toLocaleString("fr-FR")}
+                </time>
+              </div>
+              {!msg.is_read ? (
+                <form action={markMessageAsRead.bind(null, msg.id)}>
+                  <button
+                    type="submit"
+                    className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-alt)] px-3 py-1.5 text-xs font-medium text-[var(--color-text)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+                  >
+                    Marquer comme lu
+                  </button>
+                </form>
+              ) : null}
             </div>
             <div className="mt-2 flex flex-wrap gap-3 text-sm text-[var(--color-muted)]">
               {msg.email ? (

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useTransition, useState } from "react";
+import { useState, useTransition } from "react";
+import { VehicleCloudinaryUpload } from "@/components/admin/VehicleCloudinaryUpload";
 import type { SaveCarState } from "@/lib/admin/cars-actions";
 import { saveCar } from "@/lib/admin/cars-actions";
 import type { Car } from "@/lib/types";
@@ -18,11 +19,13 @@ function fieldError(state: SaveCarState | null, key: string): string | undefined
 export function VehicleForm({ car }: { car?: Car | null }) {
   const [state, setState] = useState<SaveCarState | null>(null);
   const [pending, startTransition] = useTransition();
+  const [imagesText, setImagesText] = useState(() => car?.images?.join("\n") ?? "");
 
   return (
     <form
-      className="mx-auto max-w-3xl space-y-6"
+      className="relative mx-auto max-w-3xl space-y-6"
       action={(formData) => {
+        formData.set("imagesText", imagesText);
         startTransition(async () => {
           const result = await saveCar(undefined, formData);
           if (result && result.ok === false) {
@@ -34,7 +37,6 @@ export function VehicleForm({ car }: { car?: Car | null }) {
       {car?.id ? (
         <>
           <input type="hidden" name="id" value={car.id} />
-          <input type="hidden" name="slug" value={car.slug} />
           <input type="hidden" name="views" value={car.views} />
         </>
       ) : null}
@@ -46,6 +48,20 @@ export function VehicleForm({ car }: { car?: Car | null }) {
       ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2">
+        <div className="sm:col-span-2">
+          <label className="mb-1 block text-sm font-medium text-[var(--color-text)]">
+            Slug URL (SEO)
+          </label>
+          <input
+            name="slugManual"
+            defaultValue={car?.slug ?? ""}
+            placeholder="ex. bmw-serie-3-2021 (vide = généré depuis marque / modèle / année)"
+            className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm"
+          />
+          <p className="mt-1 text-xs text-[var(--color-muted)]">
+            Minuscules, chiffres et tirets. Utilisé dans <code className="rounded bg-[var(--color-bg-alt)] px-1">/voitures/…</code>
+          </p>
+        </div>
         <div>
           <label className="mb-1 block text-sm font-medium text-[var(--color-text)]">Marque</label>
           <input
@@ -231,16 +247,25 @@ export function VehicleForm({ car }: { car?: Car | null }) {
         />
       </div>
 
-      <div>
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="text-sm font-medium text-[var(--color-text)]">Images</label>
+          <VehicleCloudinaryUpload
+            onUploaded={(url) => {
+              setImagesText((prev) => (prev.trim() ? `${prev.trim()}\n${url}` : url));
+            }}
+          />
+        </div>
         <label className="mb-1 block text-sm font-medium text-[var(--color-text)]">
-          URLs des images (une par ligne)
+          URLs des images (une par ligne — complétez après upload ou saisissez à la main)
         </label>
         <textarea
           name="imagesText"
-          rows={4}
-          defaultValue={car?.images?.join("\n") ?? ""}
+          rows={5}
+          value={imagesText}
+          onChange={(e) => setImagesText(e.target.value)}
           placeholder="https://..."
-          className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm"
+          className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 font-mono text-xs text-[var(--color-text)]"
         />
       </div>
 

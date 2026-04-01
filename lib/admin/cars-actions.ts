@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin-auth";
-import { slugify } from "@/lib/slugify";
+import { normalizeSlugInput, slugify } from "@/lib/slugify";
 import { createSupabaseServerClient } from "@/lib/supabase";
 import type { CarCondition, CarStatus, FuelType, TransmissionType } from "@/lib/types";
 
@@ -26,7 +26,7 @@ const schema = z.object({
   description: z.string().optional(),
   featuresText: z.string().optional(),
   imagesText: z.string().optional(),
-  slug: z.string().optional(),
+  slugManual: z.string().max(180).optional(),
   is_featured: z.boolean(),
   views: z.coerce.number().int().min(0).optional(),
 });
@@ -39,8 +39,14 @@ function parseList(text: string | undefined): string[] {
     .filter(Boolean);
 }
 
-function makeSlug(brand: string, model: string, year: number) {
-  return `${slugify(brand)}-${slugify(model)}-${year}-${crypto.randomUUID().slice(0, 8)}`;
+function defaultSlug(brand: string, model: string, year: number) {
+  return `${slugify(brand)}-${slugify(model)}-${year}`;
+}
+
+function resolveSlug(brand: string, model: string, year: number, manual?: string) {
+  const m = manual?.trim();
+  if (m) return normalizeSlugInput(m);
+  return defaultSlug(brand, model, year);
 }
 
 export type SaveCarState =
@@ -68,7 +74,7 @@ export async function saveCar(_prev: SaveCarState | undefined, formData: FormDat
     description: formData.get("description")?.toString() || undefined,
     featuresText: formData.get("featuresText")?.toString() || undefined,
     imagesText: formData.get("imagesText")?.toString() || undefined,
-    slug: formData.get("slug")?.toString() || undefined,
+    slugManual: formData.get("slugManual")?.toString() || undefined,
     is_featured: formData.get("is_featured") === "on",
     views: formData.get("views")?.toString(),
   };
@@ -110,7 +116,7 @@ export async function saveCar(_prev: SaveCarState | undefined, formData: FormDat
   };
 
   if (v.id) {
-    const slug = v.slug?.trim() || makeSlug(v.brand, v.model, v.year);
+    const slug = resolveSlug(v.brand, v.model, v.year, v.slugManual);
     const { error } = await supabase
       .from("cars")
       .update({
@@ -123,6 +129,9 @@ export async function saveCar(_prev: SaveCarState | undefined, formData: FormDat
       .eq("id", v.id);
 
     if (error) {
+      if (error.code === "23505" || error.message.toLowerCase().includes("duplicate")) {
+        return { ok: false, message: "Ce slug URL existe déjà. Modifiez le champ Slug." };
+      }
       return { ok: false, message: error.message };
     }
     revalidatePath("/admin/voitures");
@@ -131,7 +140,7 @@ export async function saveCar(_prev: SaveCarState | undefined, formData: FormDat
     redirect("/admin/voitures");
   }
 
-  const slug = makeSlug(v.brand, v.model, v.year);
+  const slug = resolveSlug(v.brand, v.model, v.year, v.slugManual);
   const { data, error } = await supabase
     .from("cars")
     .insert({
@@ -144,6 +153,9 @@ export async function saveCar(_prev: SaveCarState | undefined, formData: FormDat
     .single();
 
   if (error) {
+    if (error.code === "23505" || error.message.toLowerCase().includes("duplicate")) {
+      return { ok: false, message: "Ce slug URL existe déjà. Choisissez un autre slug." };
+    }
     return { ok: false, message: error.message };
   }
 

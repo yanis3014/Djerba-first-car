@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import type { LeadFormState } from "@/lib/actions/lead";
 import { submitLeadForCar } from "@/lib/actions/lead";
+import { HoneypotField } from "@/components/public/HoneypotField";
 import { getWhatsAppHref } from "@/lib/whatsapp";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +20,7 @@ export function CarLeadForm({ car }: { car: Car }) {
     <div>
       <h2 className="text-lg font-semibold text-[var(--color-text)]">Je suis intéressé</h2>
       <form
-        className="mt-3 space-y-3"
+        className="relative mt-3 space-y-3"
         action={(formData) => {
           startTransition(async () => {
             const result = await submitLeadForCar(undefined, formData);
@@ -28,6 +29,7 @@ export function CarLeadForm({ car }: { car: Car }) {
         }}
       >
         <input type="hidden" name="car_id" value={car.id} />
+        <HoneypotField />
         {state?.ok ? (
           <p className="rounded-[var(--radius-md)] border border-[var(--color-success)]/40 bg-[var(--color-success)]/10 px-3 py-2 text-sm">
             Demande enregistrée. Nous vous contactons bientôt.

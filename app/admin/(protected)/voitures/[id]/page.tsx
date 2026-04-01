@@ -16,7 +16,7 @@ export default async function AdminEditVoiturePage({ params }: { params: { id: s
         </h1>
         <p className="mt-1 text-sm text-[var(--color-muted)]">Slug public : {car.slug}</p>
       </div>
-      <VehicleForm car={car} />
+      <VehicleForm key={car.id} car={car} />
     </div>
   );
 }
