@@ -37,7 +37,7 @@ function CountUp({ value, suffix = "", label }: { value: number; suffix?: string
 export default function HomeHero() {
   const item = {
     hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" } },
+    show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" as const } },
   };
 
   return (

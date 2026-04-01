@@ -40,13 +40,13 @@ function openWhatsApp() {
 }
 
 export default function HomePageContent({ featuredCars }: { featuredCars: Car[] }) {
-  const featuredRef = useRef<HTMLElement | null>(null);
+  const featuredRef = useRef<HTMLDivElement | null>(null);
   const featuredInView = useInView(featuredRef, { once: true, amount: 0.25 });
-  const whyRef = useRef<HTMLElement | null>(null);
+  const whyRef = useRef<HTMLDivElement | null>(null);
   const whyInView = useInView(whyRef, { once: true, amount: 0.2 });
-  const timelineRef = useRef<HTMLElement | null>(null);
+  const timelineRef = useRef<HTMLDivElement | null>(null);
   const timelineInView = useInView(timelineRef, { once: true, amount: 0.25 });
-  const locationRef = useRef<HTMLElement | null>(null);
+  const locationRef = useRef<HTMLDivElement | null>(null);
   const locationInView = useInView(locationRef, { once: true, amount: 0.2 });
 
   const services = useMemo(

@@ -98,3 +98,18 @@ export async function getCarBySlug(slug: string): Promise<Car | null> {
   const cars = await getAllCars();
   return cars.find((car) => car.slug === slug) ?? null;
 }
+
+export async function getCarById(id: string): Promise<Car | null> {
+  try {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      const cars = await getAllCars();
+      return cars.find((c) => c.id === id) ?? null;
+    }
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase.from("cars").select("*").eq("id", id).maybeSingle();
+    if (error || !data) return null;
+    return data as Car;
+  } catch {
+    return null;
+  }
+}
