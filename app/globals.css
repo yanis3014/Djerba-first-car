@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg: #f8f7f5;
+  --color-bg-alt: #efefed;
+  --color-surface: #ffffff;
+  --color-surface-dark: #111111;
+  --color-white: #ffffff;
+  --color-accent: #cc1414;
+  --color-accent-hover: #a80f0f;
+  --color-text: #0d0d0d;
+  --color-muted: #6b6b6b;
+  --color-border: #e0ddd8;
+  --color-border-dark: #1e1e1e;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body), sans-serif;
+}
+
+@keyframes fabPulseRing {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+.fab-ring {
+  animation: fabPulseRing 2s ease-out infinite;
+}
