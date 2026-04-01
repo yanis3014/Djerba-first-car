@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 :root {
+  /* Palette premium (Cormorant display + Outfit body dans layout) */
   --color-bg: #f8f7f5;
   --color-bg-alt: #efefed;
   --color-surface: #ffffff;
@@ -16,6 +17,14 @@
   --color-border-dark: #1e1e1e;
   --color-success: #22c55e;
   --color-warning: #f59e0b;
+  --color-error: #b91c1c;
+  /* Rayons et ombres (UI cohérente) */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-card: 0 2px 24px rgba(13, 13, 13, 0.06);
+  --shadow-nav: 0 2px 20px rgba(0, 0, 0, 0.08);
+  --transition-fast: 150ms ease;
 }
 
 html {

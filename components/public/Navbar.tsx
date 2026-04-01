@@ -5,6 +5,8 @@ import { Menu, Phone } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import WhatsAppFloatingButton from "@/components/public/WhatsAppFloatingButton";
+import { getPublicPhoneDisplay } from "@/lib/site";
+import { getWhatsAppHref } from "@/lib/whatsapp";
 
 const navItems = [
   { href: "/", label: "Accueil" },
@@ -14,6 +16,8 @@ const navItems = [
 ];
 
 export default function Navbar() {
+  const phoneDisplay = getPublicPhoneDisplay();
+  const whatsappHref = getWhatsAppHref();
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -83,10 +87,10 @@ export default function Navbar() {
           <div className="hidden items-center gap-4 lg:flex">
             <div className="inline-flex items-center gap-2 text-sm text-[#6B6B6B]">
               <Phone className="h-4 w-4" />
-              +216 XX XXX XXX
+              {phoneDisplay}
             </div>
             <a
-              href="https://wa.me/"
+              href={whatsappHref}
               className="rounded-full bg-[#CC1414] px-5 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-[#A80F0F]"
               target="_blank"
               rel="noreferrer"

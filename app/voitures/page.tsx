@@ -1,8 +1,19 @@
+import type { Metadata } from "next";
 import Footer from "@/components/public/Footer";
 import Navbar from "@/components/public/Navbar";
 import CarCard from "@/components/public/CarCard";
 import CatalogFilters from "@/components/public/CatalogFilters";
 import { getAllCars } from "@/lib/cars";
+import { SITE_NAME } from "@/lib/site";
+
+export const metadata: Metadata = {
+  title: "Catalogue",
+  description: `Parcourez les véhicules disponibles — ${SITE_NAME}, Djerba.`,
+  openGraph: {
+    title: `Catalogue | ${SITE_NAME}`,
+    description: "Filtres par marque, prix, carburant et année.",
+  },
+};
 
 interface CatalogPageProps {
   searchParams: {

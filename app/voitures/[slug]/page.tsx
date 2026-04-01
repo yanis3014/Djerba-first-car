@@ -3,8 +3,12 @@ import Footer from "@/components/public/Footer";
 import Navbar from "@/components/public/Navbar";
 import CarGallery from "@/components/public/CarGallery";
 import CarCard from "@/components/public/CarCard";
+import { CarLeadForm } from "@/components/public/CarLeadForm";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { getAllCars, getCarBySlug } from "@/lib/cars";
+import { productJsonLd } from "@/lib/seo/json-ld";
 import { createSupabaseServerClient } from "@/lib/supabase";
+import { SITE_NAME } from "@/lib/site";
 
 interface CarDetailPageProps {
   params: { slug: string };
@@ -13,11 +17,14 @@ interface CarDetailPageProps {
 export async function generateMetadata({ params }: CarDetailPageProps) {
   const car = await getCarBySlug(params.slug);
   if (!car) return { title: "Voiture introuvable" };
+  const desc = car.description ?? `${car.brand} ${car.model} — ${car.year} — ${SITE_NAME}.`;
   return {
-    title: `${car.brand} ${car.model} ${car.year} | Djerba First Car`,
-    description: car.description ?? `${car.brand} ${car.model} disponible a Djerba First Car.`,
+    title: `${car.brand} ${car.model} ${car.year}`,
+    description: desc,
     openGraph: {
-      images: car.cover_image ? [car.cover_image] : [],
+      title: `${car.brand} ${car.model} ${car.year}`,
+      description: desc,
+      images: car.cover_image ? [car.cover_image] : car.images[0] ? [car.images[0]] : [],
     },
   };
 }
@@ -29,7 +36,7 @@ export default async function CarDetailPage({ params }: CarDetailPageProps) {
   try {
     if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       const supabase = createSupabaseServerClient();
-      await supabase.from("cars").update({ views: car.views + 1 }).eq("id", car.id);
+      await supabase.rpc("increment_car_views", { p_id: car.id });
     }
   } catch {
     // Non bloquant: la page detail doit rester accessible meme si l'update echoue.
@@ -54,6 +61,7 @@ export default async function CarDetailPage({ params }: CarDetailPageProps) {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <JsonLd data={productJsonLd(car)} />
       <Navbar />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
         <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
@@ -94,24 +102,7 @@ export default async function CarDetailPage({ params }: CarDetailPageProps) {
           </section>
 
           <aside className="h-fit rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 lg:sticky lg:top-24">
-            <h2 className="text-lg font-semibold">Je suis interesse</h2>
-            <form className="mt-3 space-y-3">
-              <input className="w-full rounded-md border border-[var(--color-border)] bg-transparent px-3 py-2 text-sm" placeholder="Nom complet" />
-              <input className="w-full rounded-md border border-[var(--color-border)] bg-transparent px-3 py-2 text-sm" placeholder="Telephone" />
-              <input className="w-full rounded-md border border-[var(--color-border)] bg-transparent px-3 py-2 text-sm" placeholder="Email" />
-              <textarea className="w-full rounded-md border border-[var(--color-border)] bg-transparent px-3 py-2 text-sm" rows={4} defaultValue={`Bonjour, je suis interesse par la ${car.brand} ${car.model}.`} />
-              <button type="button" className="w-full rounded-md bg-[var(--color-accent)] px-4 py-2 font-medium text-white hover:bg-[var(--color-accent-hover)]">
-                Envoyer
-              </button>
-            </form>
-            <a
-              href={`https://wa.me/?text=${encodeURIComponent(`Bonjour, je suis interesse par la ${car.brand} ${car.model}.`)}`}
-              className="mt-3 block rounded-md bg-[var(--color-surface-dark)] px-4 py-2 text-center text-sm text-white hover:opacity-90"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Contacter via WhatsApp
-            </a>
+            <CarLeadForm car={car} />
           </aside>
         </div>
 
