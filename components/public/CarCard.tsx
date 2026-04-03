@@ -1,5 +1,6 @@
 "use client";
 
+import type { KeyboardEvent } from "react";
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,9 +13,16 @@ interface CarCardProps {
   car: Car;
   view?: "grid" | "list";
   index?: number;
+  /** Désactive l’entrée Framer pour laisser un parent (ex. grille accueil) gérer le stagger */
+  skipEntrance?: boolean;
 }
 
-export default function CarCard({ car, view = "grid", index = 0 }: CarCardProps) {
+export default function CarCard({
+  car,
+  view = "grid",
+  index = 0,
+  skipEntrance = false,
+}: CarCardProps) {
   const router = useRouter();
   const [imageError, setImageError] = useState(false);
   const price = new Intl.NumberFormat("fr-FR").format(car.price);
@@ -26,25 +34,25 @@ export default function CarCard({ car, view = "grid", index = 0 }: CarCardProps)
     return { label: "DISPONIBLE", classes: "border-[#E0DDD8] bg-white text-[#0D0D0D]" };
   }, [car.status]);
 
-  return (
-    <motion.article
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.1 }}
-      className={`group h-full cursor-pointer overflow-hidden rounded-[12px] border border-[#E0DDD8] bg-white transition-all duration-[350ms] ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-[6px] hover:border-[#CC1414] hover:shadow-[0_24px_48px_rgba(0,0,0,0.12)] ${
-        view === "list" ? "grid gap-4 md:grid-cols-[280px_1fr]" : "flex flex-col"
-      }`}
-      onClick={() => router.push(`/voitures/${car.slug}`)}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          router.push(`/voitures/${car.slug}`);
-        }
-      }}
-      role="link"
-      tabIndex={0}
-      aria-label={`Voir le detail de ${car.brand} ${car.model}`}
-    >
+  const sharedClass = `group h-full cursor-pointer overflow-hidden rounded-[12px] border border-[#E0DDD8] bg-white transition-all duration-[350ms] ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-[6px] hover:border-[#CC1414] hover:shadow-[0_24px_48px_rgba(0,0,0,0.12)] ${
+    view === "list" ? "grid gap-4 md:grid-cols-[280px_1fr]" : "flex flex-col"
+  }`;
+
+  const interaction = {
+    onClick: () => router.push(`/voitures/${car.slug}`),
+    onKeyDown: (event: KeyboardEvent) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        router.push(`/voitures/${car.slug}`);
+      }
+    },
+    role: "link" as const,
+    tabIndex: 0,
+    "aria-label": `Voir le detail de ${car.brand} ${car.model}`,
+  };
+
+  const inner = (
+    <>
       <div className={`relative aspect-[4/3] overflow-hidden ${view === "list" ? "h-full min-h-[260px]" : ""}`}>
         {image && !imageError ? (
           <Image
@@ -91,6 +99,26 @@ export default function CarCard({ car, view = "grid", index = 0 }: CarCardProps)
           </Link>
         </div>
       </div>
+    </>
+  );
+
+  if (skipEntrance) {
+    return (
+      <article className={sharedClass} {...interaction}>
+        {inner}
+      </article>
+    );
+  }
+
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.1 }}
+      className={sharedClass}
+      {...interaction}
+    >
+      {inner}
     </motion.article>
   );
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Footer from "@/components/public/Footer";
 import HomePageContent from "@/components/public/HomePageContent";
 import Navbar from "@/components/public/Navbar";
+import ScrollVideoHero from "@/components/public/ScrollVideoHero";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getAllCars } from "@/lib/cars";
 import { organizationJsonLd } from "@/lib/seo/json-ld";
@@ -26,6 +27,7 @@ export default async function Home() {
       <div className="flex min-h-screen flex-col">
         <Navbar />
         <main className="flex-1">
+          <ScrollVideoHero />
           <HomePageContent featuredCars={featuredCars} />
         </main>
         <Footer />

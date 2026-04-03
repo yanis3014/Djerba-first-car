@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { VehicleForm } from "@/components/admin/VehicleForm";
+import { CarForm } from "@/components/admin/CarForm";
 import { getCarById } from "@/lib/cars";
 
 export default async function AdminEditVoiturePage({ params }: { params: { id: string } }) {
@@ -11,12 +11,12 @@ export default async function AdminEditVoiturePage({ params }: { params: { id: s
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-[var(--font-display)] text-3xl text-[var(--color-text)]">
-          Modifier — {car.brand} {car.model}
-        </h1>
-        <p className="mt-1 text-sm text-[var(--color-muted)]">Slug public : {car.slug}</p>
+        <h1 className="font-[var(--font-display)] text-3xl text-[var(--color-text)]">Modifier le véhicule</h1>
+        <p className="mt-1 text-sm text-[var(--color-muted)]">
+          {car.brand} {car.model} — slug public : {car.slug}
+        </p>
       </div>
-      <VehicleForm key={car.id} car={car} />
+      <CarForm key={car.id} car={car} />
     </div>
   );
 }

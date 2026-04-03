@@ -1,179 +1,457 @@
 "use client";
 
+import { Fragment, useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { motion, useInView } from "framer-motion";
+
 import Footer from "@/components/public/Footer";
 import Navbar from "@/components/public/Navbar";
-import {
-  ArrowLeftRight,
-  BadgeCheck,
-  Banknote,
-  FileCheck,
-  Shield,
-  ShoppingCart,
-} from "lucide-react";
-import { motion } from "framer-motion";
-import { getWhatsAppHref } from "@/lib/whatsapp";
 
-const services = [
+const SERVICES = [
   {
-    icon: ShoppingCart,
-    title: "Vente de voitures",
+    num: "01",
+    label: "VENTE",
+    title: "Trouvez le véhicule qui vous correspond",
     description:
-      "Selection premium de vehicules verifies, prepares et disponibles immediatement.",
+      "Notre stock est renouvelé en permanence avec des véhicules rigoureusement sélectionnés, inspectés et préparés. Chaque voiture que vous voyez sur notre site est disponible immédiatement à Djerba.",
+    bullets: [
+      "Véhicules inspectés et certifiés",
+      "Disponibles immédiatement",
+      "Prix négociables",
+    ],
+    image:
+      "https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=800&q=80",
+    imageAlt: "Showroom automobile premium",
+    cta: { href: "/voitures", label: "Voir nos voitures" },
   },
   {
-    icon: Banknote,
-    title: "Achat de votre vehicule",
+    num: "02",
+    label: "ACHAT",
+    title: "Vendez votre véhicule au meilleur prix",
     description:
-      "Estimation rapide et offre claire avec accompagnement administratif complet.",
+      "Vous souhaitez vendre votre véhicule ? Notre équipe vous propose une estimation gratuite, honnête et rapide. Pas de négociation interminable : une offre claire, transparente et équitable sous 24h.",
+    bullets: [
+      "Estimation gratuite sous 24h",
+      "Paiement rapide et sécurisé",
+      "Toutes marques acceptées",
+    ],
+    image:
+      "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=800&q=80",
+    imageAlt: "Véhicule de prestige",
+    cta: { href: "/contact", label: "Nous contacter" },
   },
   {
-    icon: ArrowLeftRight,
-    title: "Echange",
+    num: "03",
+    label: "ÉCHANGE",
+    title: "Changez de véhicule en toute sérénité",
     description:
-      "Changez de vehicule en toute simplicite avec reprise de votre ancienne voiture.",
+      "Profitez de notre service d'échange pour simplifier votre transition vers un nouveau véhicule. Nous reprenons votre ancien véhicule à sa juste valeur et vous accompagnons dans le choix du suivant.",
+    bullets: [
+      "Reprise garantie de votre véhicule",
+      "Différentiel calculé honnêtement",
+      "Une seule démarche pour tout gérer",
+    ],
+    image:
+      "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&q=80",
+    imageAlt: "Conduite sur route",
+    cta: { href: "/contact", label: "Nous contacter" },
   },
-];
+] as const;
 
-const steps = [
-  "Vous nous contactez",
-  "On evalue votre besoin",
-  "On trouve la solution",
-  "Vous repartez satisfait",
-];
+const PROCESS_STEPS = [
+  {
+    title: "Parcourez",
+    description:
+      "Explorez notre catalogue en ligne et repérez vos coups de cœur.",
+  },
+  {
+    title: "Contactez",
+    description:
+      "Appelez-nous ou écrivez sur WhatsApp. Réponse garantie le jour même.",
+  },
+  {
+    title: "Visitez",
+    description:
+      "Venez découvrir le véhicule sur place à Djerba, Route Midoun Km2.",
+  },
+  {
+    title: "Roulez",
+    description:
+      "Finalisez votre achat et prenez la route avec votre nouveau véhicule.",
+  },
+] as const;
 
-const trustItems = [
-  { icon: Shield, title: "Vehicules verifies" },
-  { icon: FileCheck, title: "Accompagnement administratif" },
-  { icon: BadgeCheck, title: "Prix transparents" },
-];
+function StatLightItem({
+  target,
+  suffix,
+  label,
+  inView,
+  showLine,
+}: {
+  target: number;
+  suffix: string;
+  label: string;
+  inView: boolean;
+  showLine: boolean;
+}) {
+  const [count, setCount] = useState(0);
 
-const fadeInUp = {
-  hidden: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
-  transition: { duration: 0.55, ease: "easeOut" as const },
-  viewport: { once: true, amount: 0.25 },
-};
-
-export function ServicesPageContent() {
-  const whatsappCta = getWhatsAppHref("Bonjour Djerba First Car, je souhaite en savoir plus sur vos services.");
+  useEffect(() => {
+    if (!inView) return;
+    let current = 0;
+    const durationMs = 1400;
+    const tickMs = 28;
+    const steps = Math.max(12, Math.ceil(durationMs / tickMs));
+    const increment = target / steps;
+    const id = window.setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        setCount(target);
+        window.clearInterval(id);
+      } else {
+        setCount(Math.floor(current));
+      }
+    }, tickMs);
+    return () => window.clearInterval(id);
+  }, [inView, target]);
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div
+      className={`flex min-h-[140px] flex-1 flex-col items-center justify-center px-3 md:px-4 ${
+        showLine ? "border-l border-[#E0DDD8]" : ""
+      }`}
+    >
+      <motion.div
+        className="mb-3 h-[2px] w-8 bg-[#CC1414]"
+        initial={{ scaleX: 0 }}
+        animate={inView ? { scaleX: 1 } : { scaleX: 0 }}
+        transition={{ duration: 0.55, ease: "easeOut" }}
+        style={{ transformOrigin: "center" }}
+      />
+      <p
+        className="font-[var(--font-display)] text-[64px] leading-none text-[#0D0D0D]"
+        style={{ fontWeight: 400 }}
+      >
+        {count}
+        {suffix}
+      </p>
+      <p className="font-[var(--font-body)] mt-2 text-center text-[12px] font-normal uppercase tracking-widest text-[#6B6B6B]">
+        {label}
+      </p>
+    </div>
+  );
+}
+
+function ServiceSection({
+  service,
+  index,
+}: {
+  service: (typeof SERVICES)[number];
+  index: number;
+}) {
+  const ref = useRef<HTMLElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.25 });
+  const isEven = index % 2 === 1;
+
+  const imageFrom = isEven ? 48 : -48;
+  const textFrom = isEven ? -48 : 48;
+
+  const imageBlock = (
+    <motion.div
+      className="relative min-h-[280px] w-full md:min-h-[480px]"
+      initial={{ opacity: 0, x: imageFrom }}
+      animate={inView ? { opacity: 1, x: 0 } : { opacity: 0, x: imageFrom }}
+      transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <Image
+        src={service.image}
+        alt={service.imageAlt}
+        fill
+        className="object-cover"
+        sizes="(max-width: 768px) 100vw, 50vw"
+        priority={index === 0}
+      />
+    </motion.div>
+  );
+
+  const textBlock = (
+    <motion.div
+      className="relative flex min-h-[280px] flex-col justify-center bg-white px-8 py-12 md:min-h-[480px] md:px-16"
+      initial={{ opacity: 0, x: textFrom }}
+      animate={inView ? { opacity: 1, x: 0 } : { opacity: 0, x: textFrom }}
+      transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.06 }}
+    >
+      <span
+        className="font-[var(--font-display)] pointer-events-none absolute right-6 top-6 select-none text-[120px] leading-none text-[#F0EDED] md:right-10 md:top-10"
+        aria-hidden
+      >
+        {service.num}
+      </span>
+      <div className="relative z-10">
+        <p className="font-[var(--font-body)] text-[11px] font-medium uppercase tracking-widest text-[#CC1414]">
+          {service.label}
+        </p>
+        <h2
+          id={`service-${service.num}-title`}
+          className="font-[var(--font-display)] mt-3 max-w-md text-[44px] font-normal leading-tight text-[#0D0D0D]"
+        >
+          {service.title}
+        </h2>
+        <p className="font-[var(--font-body)] mt-4 max-w-[440px] text-[15px] leading-[1.8] text-[#6B6B6B]">
+          {service.description}
+        </p>
+        <ul className="font-[var(--font-body)] mt-6 space-y-3 text-[14px] text-[#0D0D0D]">
+          {service.bullets.map((item) => (
+            <li key={item} className="flex items-start gap-3">
+              <span
+                className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#CC1414] text-[10px] font-bold text-white"
+                aria-hidden
+              >
+                ✓
+              </span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+        <Link
+          href={service.cta.href}
+          className="font-[var(--font-body)] mt-8 inline-flex w-fit items-center justify-center bg-[#CC1414] px-7 py-3 text-[14px] font-semibold text-white transition-colors hover:bg-[#a80f0f]"
+        >
+          {service.cta.label}
+        </Link>
+      </div>
+    </motion.div>
+  );
+
+  return (
+    <section
+      ref={ref}
+      className="grid w-full grid-cols-1 md:grid-cols-2"
+      aria-labelledby={`service-${service.num}-title`}
+    >
+      {isEven ? (
+        <>
+          <div className="order-1 md:order-1">{textBlock}</div>
+          <div className="order-2 md:order-2">{imageBlock}</div>
+        </>
+      ) : (
+        <>
+          <div className="order-1 md:order-1">{imageBlock}</div>
+          <div className="order-2 md:order-2">{textBlock}</div>
+        </>
+      )}
+    </section>
+  );
+}
+
+export function ServicesPageContent() {
+  const statsRef = useRef<HTMLElement>(null);
+  const statsInView = useInView(statsRef, { once: true, amount: 0.35 });
+
+  const processRef = useRef<HTMLElement>(null);
+  const processInView = useInView(processRef, { once: true, amount: 0.2 });
+
+  const ctaRef = useRef<HTMLElement>(null);
+  const ctaInView = useInView(ctaRef, { once: true, amount: 0.35 });
+
+  return (
+    <div className="flex min-h-screen flex-col bg-white">
       <Navbar />
       <main className="flex-1">
-        <motion.section
-          initial={fadeInUp.hidden}
-          whileInView={fadeInUp.whileInView}
-          transition={fadeInUp.transition}
-          viewport={fadeInUp.viewport}
-          className="flex h-[200px] w-full items-center justify-center border-b border-[var(--color-border)] bg-[var(--color-bg)] px-4"
-        >
-          <div className="text-center">
-            <h1 className="font-[var(--font-display)] text-5xl text-[var(--color-accent)] md:text-6xl">
-              Nos Services
-            </h1>
-            <p className="mt-2 text-sm text-[var(--color-muted)] md:text-base">
-              Vente, achat et echange de vehicules premium a Djerba
-            </p>
-          </div>
-        </motion.section>
+        {/* SECTION 1 — HERO */}
+        <header className="flex h-[320px] w-full flex-col items-center justify-center bg-[#111111] px-4 text-center">
+          <p className="font-[var(--font-body)] text-[11px] font-medium uppercase tracking-[0.3em] text-[#CC1414]">
+            DJERBA FIRST CAR
+          </p>
+          <h1 className="font-[var(--font-display)] mt-4 text-[52px] font-normal leading-none text-white md:text-[72px]">
+            Nos Services
+          </h1>
+          <div
+            className="mx-auto mt-4 h-[2px] w-12 bg-[#CC1414]"
+            aria-hidden
+          />
+          <p className="font-[var(--font-body)] mx-auto mt-6 max-w-xl text-base text-[#999999] md:text-[16px]">
+            Vente · Achat · Échange — Nous vous accompagnons à chaque étape de
+            votre projet automobile.
+          </p>
+        </header>
 
-        <motion.section
-          initial={fadeInUp.hidden}
-          whileInView={fadeInUp.whileInView}
-          transition={fadeInUp.transition}
-          viewport={fadeInUp.viewport}
-          className="mx-auto w-full max-w-6xl px-4 py-12"
-        >
-          <div className="grid gap-5 md:grid-cols-3">
-            {services.map((service) => {
-              const Icon = service.icon;
-              return (
-                <article
-                  key={service.title}
-                  className="flex min-h-[320px] flex-col rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-8"
-                >
-                  <div className="mb-5 w-fit rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-alt)] p-3">
-                    <Icon className="h-7 w-7 text-[var(--color-accent)]" />
-                  </div>
-                  <h2 className="text-2xl text-[var(--color-text)]">{service.title}</h2>
-                  <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">{service.description}</p>
-                  <a
-                    href="/contact"
-                    className="mt-auto inline-flex items-center gap-2 pt-8 text-sm text-[var(--color-accent)] hover:underline"
-                  >
-                    En savoir plus
-                  </a>
-                </article>
-              );
-            })}
-          </div>
-        </motion.section>
+        {/* SECTION 2 — SERVICES DÉTAILLÉS */}
+        {SERVICES.map((service, index) => (
+          <ServiceSection key={service.num} service={service} index={index} />
+        ))}
 
-        <motion.section
-          initial={fadeInUp.hidden}
-          whileInView={fadeInUp.whileInView}
-          transition={fadeInUp.transition}
-          viewport={fadeInUp.viewport}
-          className="mx-auto w-full max-w-6xl px-4 py-8"
+        {/* SECTION 3 — CHIFFRES CLÉS */}
+        <section
+          ref={statsRef}
+          className="w-full bg-[#F8F7F5] py-20"
+          aria-label="Chiffres clés"
         >
-          <h2 className="font-[var(--font-display)] text-4xl text-[var(--color-accent)]">
-            Comment ca marche ?
-          </h2>
-          <div className="mt-7 grid gap-5 md:grid-cols-4">
-            {steps.map((step, index) => (
-              <div key={step} className="relative rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
-                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-accent)] text-sm font-semibold text-[var(--color-accent)]">
-                  {index + 1}
-                </div>
-                <p className="text-sm text-[var(--color-muted)]">{step}</p>
+          <div className="mx-auto flex max-w-6xl flex-col px-4 sm:flex-row md:px-6">
+            <StatLightItem
+              target={50}
+              suffix="+"
+              label="Véhicules en stock"
+              inView={statsInView}
+              showLine={false}
+            />
+            <StatLightItem
+              target={5}
+              suffix=""
+              label="Ans d'expérience"
+              inView={statsInView}
+              showLine
+            />
+            <StatLightItem
+              target={500}
+              suffix="+"
+              label="Clients satisfaits"
+              inView={statsInView}
+              showLine
+            />
+            <StatLightItem
+              target={24}
+              suffix="h"
+              label="Délai de réponse"
+              inView={statsInView}
+              showLine
+            />
+          </div>
+        </section>
+
+        {/* SECTION 4 — COMMENT ÇA MARCHE */}
+        <section
+          ref={processRef}
+          className="w-full bg-white py-24"
+          aria-labelledby="process-heading"
+        >
+          <div className="mx-auto max-w-6xl px-4 md:px-6">
+            <div className="max-w-3xl">
+              <p className="font-[var(--font-body)] mb-3 text-[11px] font-medium uppercase tracking-[0.2em] text-[#CC1414]">
+                LE PROCESSUS
+              </p>
+              <h2
+                id="process-heading"
+                className="font-[var(--font-display)] text-[40px] font-normal leading-tight text-[#0D0D0D] md:text-[52px]"
+              >
+                Simple, rapide, transparent
+              </h2>
+            </div>
+
+            <div className="relative z-0 mt-14 md:mt-16">
+              <div className="relative z-10 flex flex-col gap-12 md:flex-row md:items-start md:gap-0">
+                {PROCESS_STEPS.map((step, index) => (
+                  <Fragment key={step.title}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 24 }}
+                      animate={
+                        processInView
+                          ? { opacity: 1, y: 0 }
+                          : { opacity: 0, y: 24 }
+                      }
+                      transition={{
+                        duration: 0.5,
+                        ease: "easeOut",
+                        delay: index * 0.12,
+                      }}
+                      className="relative z-10 flex-1 text-center md:text-left"
+                    >
+                      <p className="font-[var(--font-display)] text-[72px] font-normal leading-none text-[#CC1414] md:text-[96px]">
+                        {String(index + 1).padStart(2, "0")}
+                      </p>
+                      <div
+                        className="mx-auto mt-2 h-px w-10 bg-[#CC1414] md:mx-0"
+                        aria-hidden
+                      />
+                      <h3 className="font-[var(--font-body)] mt-4 text-[18px] font-bold text-[#0D0D0D]">
+                        {step.title}
+                      </h3>
+                      <p className="font-[var(--font-body)] mx-auto mt-2 max-w-[220px] text-[14px] leading-relaxed text-[#6B6B6B] md:mx-0 md:max-w-[200px]">
+                        {step.description}
+                      </p>
+                    </motion.div>
+                    {index < PROCESS_STEPS.length - 1 && (
+                      <div
+                        className="relative z-0 hidden h-[96px] flex-[0.35] items-start justify-center pt-[48px] md:flex"
+                        aria-hidden
+                      >
+                        <motion.div
+                          className="h-px w-full border-t border-dashed border-[#CC1414]"
+                          initial={{ scaleX: 0 }}
+                          animate={
+                            processInView ? { scaleX: 1 } : { scaleX: 0 }
+                          }
+                          transition={{
+                            duration: 0.55,
+                            ease: "easeOut",
+                            delay: index * 0.12 + 0.15,
+                          }}
+                          style={{ transformOrigin: "left" }}
+                        />
+                      </div>
+                    )}
+                  </Fragment>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
-        </motion.section>
+        </section>
 
-        <motion.section
-          initial={fadeInUp.hidden}
-          whileInView={fadeInUp.whileInView}
-          transition={fadeInUp.transition}
-          viewport={fadeInUp.viewport}
-          className="mx-auto w-full max-w-6xl px-4 py-8"
+        {/* SECTION 5 — CTA FINAL */}
+        <section
+          ref={ctaRef}
+          className="w-full bg-[#111111] py-24"
+          aria-labelledby="services-cta-heading"
         >
-          <div className="grid gap-4 md:grid-cols-3">
-            {trustItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <article
-                  key={item.title}
-                  className="flex items-center gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
-                >
-                  <Icon className="h-6 w-6 text-[var(--color-accent)]" />
-                  <p className="text-sm text-[var(--color-text)]">{item.title}</p>
-                </article>
-              );
-            })}
-          </div>
-        </motion.section>
-
-        <motion.section
-          initial={fadeInUp.hidden}
-          whileInView={fadeInUp.whileInView}
-          transition={fadeInUp.transition}
-          viewport={fadeInUp.viewport}
-          className="mt-8 w-full bg-[var(--color-surface-dark)] px-4 py-10"
-        >
-          <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 md:flex-row">
-            <h3 className="text-3xl font-semibold text-white">Pret a commencer ?</h3>
-            <a
-              href={whatsappCta}
-              className="rounded-md bg-[var(--color-accent)] px-5 py-3 text-sm font-medium text-white hover:bg-[var(--color-accent-hover)]"
-              target="_blank"
-              rel="noreferrer"
+          <div className="mx-auto max-w-3xl px-4 text-center md:px-6">
+            <motion.h2
+              id="services-cta-heading"
+              className="font-[var(--font-display)] text-[40px] font-normal leading-tight text-white md:text-[56px]"
+              initial={{ opacity: 0, y: 16 }}
+              animate={ctaInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+              transition={{ duration: 0.5 }}
             >
-              WhatsApp
-            </a>
+              Prêt à concrétiser votre projet ?
+            </motion.h2>
+            <motion.p
+              className="font-[var(--font-body)] mx-auto mt-4 max-w-[500px] text-[16px] text-[#999999]"
+              initial={{ opacity: 0, y: 12 }}
+              animate={ctaInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+              transition={{ duration: 0.5, delay: 0.06 }}
+            >
+              Contactez notre équipe dès aujourd&apos;hui. Nous sommes à votre
+              disposition à Djerba.
+            </motion.p>
+            <motion.div
+              className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row"
+              initial={{ opacity: 0, y: 12 }}
+              animate={ctaInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+              transition={{ duration: 0.5, delay: 0.12 }}
+            >
+              <Link
+                href="/voitures"
+                className="font-[var(--font-body)] inline-flex min-w-[200px] items-center justify-center bg-white px-8 py-3.5 text-[14px] font-semibold text-black transition-colors hover:bg-[#f0f0f0]"
+              >
+                Voir nos voitures
+              </Link>
+              <Link
+                href="/contact"
+                className="font-[var(--font-body)] inline-flex min-w-[200px] items-center justify-center bg-[#CC1414] px-8 py-3.5 text-[14px] font-semibold text-white transition-colors hover:bg-[#a80f0f]"
+              >
+                Nous contacter
+              </Link>
+            </motion.div>
+            <motion.p
+              className="font-[var(--font-body)] mt-6 text-center text-[14px] text-[#999999]"
+              initial={{ opacity: 0 }}
+              animate={ctaInView ? { opacity: 1 } : { opacity: 0 }}
+              transition={{ duration: 0.45, delay: 0.2 }}
+            >
+              +216 XX XXX XXX • Lun–Sam 8h–18h
+            </motion.p>
           </div>
-        </motion.section>
+        </section>
       </main>
       <Footer />
     </div>
