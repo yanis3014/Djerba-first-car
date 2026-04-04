@@ -205,7 +205,7 @@ export function CarForm({ car }: { car?: Car | null }) {
 
   useEffect(() => {
     originalImagesRef.current = car?.images ?? [];
-  }, [car?.id]);
+  }, [car?.id, car?.images]);
 
   const images = watch("images");
 
