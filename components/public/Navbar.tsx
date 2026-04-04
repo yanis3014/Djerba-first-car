@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import WhatsAppFloatingButton from "@/components/public/WhatsAppFloatingButton";
 import { useSiteSettings } from "@/components/public/SiteSettingsProvider";
-import { buildWhatsAppHref } from "@/lib/whatsapp";
+import { buildWhatsAppHref, DEFAULT_WHATSAPP_PREFILL } from "@/lib/whatsapp";
 
 const navItems = [
   { href: "/", label: "Accueil" },
@@ -18,7 +18,7 @@ const navItems = [
 export default function Navbar() {
   const site = useSiteSettings();
   const phoneDisplay = site.phone_display;
-  const whatsappHref = buildWhatsAppHref(site.whatsapp_number);
+  const whatsappHref = buildWhatsAppHref(site.whatsapp_number, DEFAULT_WHATSAPP_PREFILL);
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);

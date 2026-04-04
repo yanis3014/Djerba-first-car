@@ -45,10 +45,14 @@ function AdminNavLinks({
   collapsed,
   onNavigate,
   className,
+  newLeads = 0,
+  unreadMessages = 0,
 }: {
   collapsed?: boolean;
   onNavigate?: () => void;
   className?: string;
+  newLeads?: number;
+  unreadMessages?: number;
 }) {
   const pathname = usePathname();
 
@@ -56,6 +60,9 @@ function AdminNavLinks({
     <nav className={cn("flex flex-col gap-1", className)}>
       {navLinks.map(({ href, label, icon: Icon }) => {
         const active = isActive(pathname, href);
+        const badge =
+          href === "/admin/leads" ? newLeads : href === "/admin/messages" ? unreadMessages : 0;
+        const showBadge = badge > 0;
         return (
           <Link
             key={href}
@@ -64,14 +71,33 @@ function AdminNavLinks({
             title={collapsed ? label : undefined}
             className={cn(
               "flex items-center gap-3 rounded-[var(--radius-md)] text-sm font-medium transition-colors duration-150",
-              collapsed ? "justify-center px-2 py-2.5" : "px-3 py-2.5",
+              collapsed ? "justify-center px-2 py-2.5" : "w-full px-3 py-2.5",
+              collapsed && showBadge && "relative",
               active
                 ? "bg-[var(--color-bg-alt)] text-[var(--color-text)] shadow-sm"
                 : "text-[var(--color-muted)] hover:bg-[var(--color-bg-alt)] hover:text-[var(--color-text)]",
             )}
           >
             <Icon className="h-[1.125rem] w-[1.125rem] shrink-0" aria-hidden />
-            <span className={cn(collapsed && "sr-only")}>{label}</span>
+            <span className={cn("min-w-0 truncate", collapsed && "sr-only")}>{label}</span>
+            {!collapsed && showBadge ? (
+              <span
+                className="ml-auto flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-[#CC1414] px-1.5 text-[10px] font-bold leading-none text-white"
+                aria-label={
+                  href === "/admin/leads"
+                    ? `${badge} nouveau${badge > 1 ? "x" : ""} lead${badge > 1 ? "s" : ""}`
+                    : `${badge} message${badge > 1 ? "s" : ""} non lu${badge > 1 ? "s" : ""}`
+                }
+              >
+                {badge > 99 ? "99+" : badge}
+              </span>
+            ) : null}
+            {collapsed && showBadge ? (
+              <span
+                className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[#CC1414]"
+                aria-hidden
+              />
+            ) : null}
           </Link>
         );
       })}
@@ -110,10 +136,19 @@ function AdminNavFooter({
   );
 }
 
-export function AdminShell({ children }: { children: React.ReactNode }) {
+export function AdminShell({
+  children,
+  newLeads = 0,
+  unreadMessages = 0,
+}: {
+  children: React.ReactNode;
+  newLeads?: number;
+  unreadMessages?: number;
+}) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const totalNotifications = newLeads + unreadMessages;
 
   useEffect(() => {
     try {
@@ -146,9 +181,15 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <SheetTrigger asChild>
             <button
               type="button"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] text-[var(--color-text)] transition hover:bg-[var(--color-bg-alt)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2"
+              className="relative inline-flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] text-[var(--color-text)] transition hover:bg-[var(--color-bg-alt)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2"
             >
               <Menu className="h-6 w-6" strokeWidth={1.75} />
+              {totalNotifications > 0 ? (
+                <span
+                  className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-[#CC1414] ring-2 ring-white"
+                  aria-hidden
+                />
+              ) : null}
               <span className="sr-only">Ouvrir le menu de navigation</span>
             </button>
           </SheetTrigger>
@@ -161,7 +202,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               <p className="text-xs font-normal text-[var(--color-muted)]">Djerba Car — espace réservé</p>
             </SheetHeader>
             <div className="flex flex-1 flex-col overflow-y-auto px-4 py-4">
-              <AdminNavLinks onNavigate={closeMobile} />
+              <AdminNavLinks
+                onNavigate={closeMobile}
+                newLeads={newLeads}
+                unreadMessages={unreadMessages}
+              />
               <AdminNavFooter onNavigate={closeMobile} />
             </div>
           </SheetContent>
@@ -211,7 +256,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               </button>
             </div>
 
-            <AdminNavLinks collapsed={hydrated && collapsed} className="min-h-0 flex-1" />
+            <AdminNavLinks
+              collapsed={hydrated && collapsed}
+              className="min-h-0 flex-1"
+              newLeads={newLeads}
+              unreadMessages={unreadMessages}
+            />
             <AdminNavFooter collapsed={hydrated && collapsed} />
           </div>
         </aside>

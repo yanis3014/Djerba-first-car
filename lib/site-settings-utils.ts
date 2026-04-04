@@ -1,5 +1,15 @@
 /** Adresse de secours si la base est vide ou indisponible. */
-export const SITE_SETTINGS_FALLBACK_ADDRESS = "Djerba, Houmt Essouk, Route Midoun Km2";
+export const SITE_SETTINGS_FALLBACK_ADDRESS = "VV4Q+GH2, Houmt Souk, Tunisie";
+
+/** Valeurs par défaut si colonnes absentes ou vides (alignées sur la migration SQL). */
+export const SITE_SETTINGS_DEFAULTS = {
+  hours_weekday: "8h00 - 18h00",
+  hours_sunday: "9h00 - 14h00",
+  hero_title: "L'ÉMOTION DE CONDUIRE",
+  hero_subtitle: "COMMENCE ICI",
+  hero_body: "Chaque véhicule est une promesse.",
+  tiktok_label: "@djerbafirstcar",
+} as const;
 
 export function mapsEmbedUrlFromAddress(address: string): string {
   const q = encodeURIComponent(address.trim() || SITE_SETTINGS_FALLBACK_ADDRESS);

@@ -5,6 +5,8 @@ import { notifyContactMessageEmail } from "@/lib/email/notify";
 import { allowPublicFormSubmission, isHoneypotTriggered } from "@/lib/public-form-guard";
 import { createSupabaseServerClient } from "@/lib/supabase";
 
+const messageRequestTypeSchema = z.enum(["info", "sell", "exchange", "visit", "other"]);
+
 const schema = z.object({
   name: z.string().min(1, "Nom requis").max(120),
   phone: z.string().max(40).optional(),
@@ -13,6 +15,7 @@ const schema = z.object({
     .max(255)
     .refine((s) => s === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s), "Email invalide"),
   subject: z.string().max(200).optional(),
+  type: messageRequestTypeSchema.catch("info"),
   message: z.string().min(1, "Message requis").max(5000),
 });
 
@@ -33,6 +36,7 @@ export async function submitContactMessage(_prev: ContactFormState | undefined, 
     phone: formData.get("phone")?.toString() ?? "",
     email: formData.get("email")?.toString() ?? "",
     subject: formData.get("subject")?.toString() ?? "",
+    type: formData.get("type")?.toString() ?? "info",
     message: formData.get("message")?.toString() ?? "",
   };
 
@@ -52,6 +56,7 @@ export async function submitContactMessage(_prev: ContactFormState | undefined, 
     phone: v.phone?.trim() || null,
     email: v.email?.trim() || null,
     subject: v.subject || null,
+    type: v.type,
     message: v.message,
     is_read: false,
   });
@@ -66,6 +71,7 @@ export async function submitContactMessage(_prev: ContactFormState | undefined, 
       phone: v.phone?.trim() || null,
       email: v.email?.trim() || null,
       subject: v.subject || null,
+      type: v.type,
       message: v.message,
     });
   } catch {

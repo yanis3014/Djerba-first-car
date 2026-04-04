@@ -29,7 +29,11 @@ export default async function Home() {
       <div className="flex min-h-screen flex-col">
         <Navbar />
         <main className="flex-1">
-          <ScrollVideoHero />
+          <ScrollVideoHero
+            heroTitle={siteSettings.hero_title}
+            heroSubtitle={siteSettings.hero_subtitle}
+            heroBody={siteSettings.hero_body}
+          />
           <HomePageContent featuredCars={featuredCars} />
         </main>
         <Footer />

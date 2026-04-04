@@ -2,11 +2,12 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useForm, type FieldErrors, type Resolver } from "react-hook-form";
 import { z } from "zod";
-import { createCar, updateCar, type CarPayload } from "@/app/actions/cars";
+import { createCar, deleteCarImage, updateCar, type CarPayload } from "@/app/actions/cars";
+import { extractPublicIdFromCloudinaryUrl } from "@/lib/cloudinary-public-id";
 import { ImageUploader } from "@/components/admin/ImageUploader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/cn";
@@ -181,6 +182,9 @@ function inputFieldClass(hasError: boolean) {
 export function CarForm({ car }: { car?: Car | null }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabId>("base");
+  const formSubmittedRef = useRef(false);
+  const imagesRef = useRef<string[]>([]);
+  const originalImagesRef = useRef<string[]>(car?.images ?? []);
 
   const {
     register,
@@ -199,7 +203,32 @@ export function CarForm({ car }: { car?: Car | null }) {
     reset(defaultsFromCar(car));
   }, [car, reset]);
 
+  useEffect(() => {
+    originalImagesRef.current = car?.images ?? [];
+  }, [car?.id]);
+
   const images = watch("images");
+
+  useEffect(() => {
+    imagesRef.current = images ?? [];
+  }, [images]);
+
+  useEffect(() => {
+    return () => {
+      const currentImages = imagesRef.current;
+      const originalImages = originalImagesRef.current;
+      const newlyUploaded = currentImages.filter((url) => !originalImages.includes(url));
+      if (newlyUploaded.length > 0 && !formSubmittedRef.current) {
+        newlyUploaded.forEach((url) => {
+          const publicId = extractPublicIdFromCloudinaryUrl(url);
+          if (publicId) {
+            void deleteCarImage(publicId).catch(() => {});
+          }
+        });
+      }
+    };
+  }, []);
+
   const coverImage = watch("cover_image");
   const features = watch("features");
 
@@ -247,10 +276,12 @@ export function CarForm({ car }: { car?: Car | null }) {
     try {
       if (car?.id) {
         await updateCar(car.id, payload);
+        formSubmittedRef.current = true;
         toast.success("Véhicule mis à jour", { description: "Les modifications ont été enregistrées." });
         router.refresh();
       } else {
         const { id } = await createCar(payload);
+        formSubmittedRef.current = true;
         toast.success("Véhicule ajouté avec succès", { description: "Redirection vers la fiche…" });
         router.push(`/admin/voitures/${id}`);
         router.refresh();

@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { getSiteUrl } from "@/lib/site";
+import { MESSAGE_REQUEST_LABELS, type MessageRequestType } from "@/lib/types";
 
 function getResend(): Resend | null {
   const key = process.env.RESEND_API_KEY;
@@ -54,6 +55,7 @@ export async function notifyContactMessageEmail(payload: {
   phone: string | null;
   email: string | null;
   subject: string | null;
+  type: MessageRequestType;
   message: string;
 }): Promise<void> {
   const resend = getResend();
@@ -62,6 +64,7 @@ export async function notifyContactMessageEmail(payload: {
   if (!resend || !to || !from) return;
 
   const site = getSiteUrl();
+  const typeLabel = MESSAGE_REQUEST_LABELS[payload.type] ?? payload.type;
   await resend.emails.send({
     from,
     to,
@@ -72,6 +75,7 @@ export async function notifyContactMessageEmail(payload: {
         <li><strong>Nom :</strong> ${escapeHtml(payload.name)}</li>
         ${payload.phone ? `<li><strong>Téléphone :</strong> ${escapeHtml(payload.phone)}</li>` : ""}
         ${payload.email ? `<li><strong>Email :</strong> ${escapeHtml(payload.email)}</li>` : ""}
+        <li><strong>Type de demande :</strong> ${escapeHtml(typeLabel)}</li>
         ${payload.subject ? `<li><strong>Sujet :</strong> ${escapeHtml(payload.subject)}</li>` : ""}
       </ul>
       <p><strong>Message :</strong><br/>${escapeHtml(payload.message).replace(/\n/g, "<br/>")}</p>

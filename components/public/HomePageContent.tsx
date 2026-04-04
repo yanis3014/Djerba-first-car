@@ -7,6 +7,7 @@ import {
   MapPin,
   MessageCircle,
   Phone,
+  Star,
 } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import type { Car } from "@/lib/types";
@@ -17,7 +18,7 @@ import {
   mapsEmbedUrlFromAddress,
   phoneDisplayToTelHref,
 } from "@/lib/site-settings-utils";
-import { buildWhatsAppHref } from "@/lib/whatsapp";
+import { buildWhatsAppHref, DEFAULT_WHATSAPP_PREFILL } from "@/lib/whatsapp";
 
 function StatItem({
   target,
@@ -84,7 +85,7 @@ export default function HomePageContent({ featuredCars }: { featuredCars: Car[] 
   const site = useSiteSettings();
 
   const openWhatsApp = () => {
-    const href = buildWhatsAppHref(site.whatsapp_number);
+    const href = buildWhatsAppHref(site.whatsapp_number, DEFAULT_WHATSAPP_PREFILL);
     if (href === "#whatsapp") return;
     window.open(href, "_blank", "noopener,noreferrer");
   };
@@ -106,6 +107,9 @@ export default function HomePageContent({ featuredCars }: { featuredCars: Car[] 
 
   const processRef = useRef<HTMLElement>(null);
   const processInView = useInView(processRef, { once: true, amount: 0.2 });
+
+  const reviewsRef = useRef<HTMLElement>(null);
+  const reviewsInView = useInView(reviewsRef, { once: true, amount: 0.15 });
 
   const locationRef = useRef<HTMLElement>(null);
   const locationInView = useInView(locationRef, { once: true, amount: 0.15 });
@@ -176,7 +180,65 @@ export default function HomePageContent({ featuredCars }: { featuredCars: Car[] 
     },
   ];
 
-  const waHref = buildWhatsAppHref(site.whatsapp_number);
+  const googleReviews = [
+    {
+      name: "Pedro Medeiros",
+      initial: "P",
+      avatarBg: "#5C6BC0",
+      localGuide: false,
+      date: "il y a 2 ans",
+      text:
+        "Je tiens à remercier Djerba First Car pour leur transparence et leur efficacité.",
+    },
+    {
+      name: "Rachid Ghileb",
+      initial: "R",
+      avatarBg: "#7E57C2",
+      localGuide: true,
+      date: "il y a 4 mois",
+      text: "Gamme variée de voitures à vendre",
+    },
+    {
+      name: "Mounir TANAZEFTI",
+      initial: "M",
+      avatarBg: "#1976D2",
+      localGuide: true,
+      date: "il y a 2 ans",
+      text:
+        "Société spécialisée dans la vente des voitures service rapide et direction sérieuse et agents hautement qualifiés",
+    },
+    {
+      name: "Mounir Tanazefti",
+      initial: "M",
+      avatarBg: "#0288D1",
+      localGuide: true,
+      date: "il y a 2 ans",
+      text:
+        "Société spécialisée dans la vente des voitures service rapide et agents aimables et serviables grâce au directeur de la société",
+    },
+    {
+      name: "Hassan Henchiri",
+      initial: "H",
+      avatarBg: "#7E57C2",
+      localGuide: false,
+      date: "il y a 2 ans",
+      text: "gens de confiances et professionnels",
+    },
+    {
+      name: "ELJISS ANIS",
+      initial: "E",
+      avatarBg: "#1976D2",
+      localGuide: true,
+      date: "il y a 2 ans",
+      text: "Chaleureux",
+    },
+  ] as const;
+
+  const googleMapsReviewsHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    `Djerba First Car ${site.address}`,
+  )}`;
+
+  const waHref = buildWhatsAppHref(site.whatsapp_number, DEFAULT_WHATSAPP_PREFILL);
   const mapsDirectionsHref = mapsDirectionsUrlFromAddress(site.address);
   const mapsEmbedSrc = mapsEmbedUrlFromAddress(site.address);
   const telHref = phoneDisplayToTelHref(site.phone_display);
@@ -446,7 +508,7 @@ export default function HomePageContent({ featuredCars }: { featuredCars: Car[] 
               Contacter sur WhatsApp
             </button>
             <p className="font-[var(--font-body)] mt-3 text-center text-[12px] text-[#666666]">
-              Lun–Sam 8h–18h • Dim 9h–14h
+              Lun–Sam {site.hours_weekday} • Dim {site.hours_sunday}
             </p>
           </motion.div>
         </div>
@@ -514,6 +576,133 @@ export default function HomePageContent({ featuredCars }: { featuredCars: Car[] 
         </div>
       </section>
 
+      {/* SECTION — AVIS GOOGLE */}
+      <section
+        ref={reviewsRef}
+        className="w-full border-t border-[#E0DDD8] bg-[#F8F7F5] py-24"
+        aria-label="Avis clients Google"
+      >
+        <div className="mx-auto max-w-6xl px-4 md:px-6">
+          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="font-[var(--font-body)] mb-3 text-[11px] font-medium uppercase tracking-[0.2em] text-[#CC1414]">
+                AVIS CLIENTS
+              </p>
+              <h2 className="font-[var(--font-display)] text-[44px] font-medium leading-tight text-[#0D0D0D] md:text-[52px]">
+                Ils nous ont fait confiance
+              </h2>
+              <p className="font-[var(--font-body)] mt-3 max-w-xl text-[15px] leading-relaxed text-[#6B6B6B]">
+                Extraits d&apos;avis Google — merci à nos clients pour leur
+                confiance.
+              </p>
+            </div>
+            <a
+              href={googleMapsReviewsHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-[var(--font-body)] inline-flex shrink-0 items-center gap-2 text-[14px] font-semibold text-[#0D0D0D] underline-offset-4 hover:underline"
+            >
+              Voir sur Google Maps
+              <span aria-hidden>→</span>
+            </a>
+          </div>
+
+          <div className="mt-14 grid gap-0 md:grid-cols-2 md:gap-x-10 lg:gap-x-14">
+            {googleReviews.map((review, index) => (
+              <motion.article
+                key={`${review.name}-${index}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={
+                  reviewsInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }
+                }
+                transition={{
+                  duration: 0.45,
+                  ease: "easeOut",
+                  delay: index * 0.06,
+                }}
+                className={`border-b border-[#E0DDD8] py-8 last:border-b-0 md:[&:nth-last-child(-n+2)]:border-b-0 ${
+                  index % 2 === 0
+                    ? "md:border-r md:pr-8 lg:pr-12"
+                    : "md:pl-8 lg:pl-12"
+                }`}
+              >
+                <div className="flex gap-3">
+                  <div
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[15px] font-semibold text-white"
+                    style={{ backgroundColor: review.avatarBg }}
+                    aria-hidden
+                  >
+                    {review.initial}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                      <p className="font-[var(--font-body)] text-[15px] font-semibold text-[#0D0D0D]">
+                        {review.name}
+                      </p>
+                      {review.localGuide && (
+                        <span
+                          className="inline-flex items-center gap-0.5 text-[11px] font-medium text-[#E37400]"
+                          title="Local Guide"
+                        >
+                          <Star
+                            className="h-3 w-3 fill-[#E37400] text-[#E37400]"
+                            aria-hidden
+                          />
+                          Local Guide
+                        </span>
+                      )}
+                    </div>
+                    <p className="font-[var(--font-body)] mt-0.5 flex flex-wrap items-center gap-1.5 text-[12px] text-[#6B6B6B]">
+                      <span>Avis</span>
+                      <span className="inline-flex items-center gap-1 font-medium text-[#0D0D0D]">
+                        <svg
+                          className="h-3.5 w-3.5 shrink-0"
+                          viewBox="0 0 24 24"
+                          aria-hidden
+                        >
+                          <path
+                            fill="#4285F4"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                          />
+                          <path
+                            fill="#34A853"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                          />
+                          <path
+                            fill="#FBBC05"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                          />
+                          <path
+                            fill="#EA4335"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                          />
+                        </svg>
+                        Google
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="font-[var(--font-body)] mt-4 flex flex-wrap items-center gap-2 text-[13px] text-[#6B6B6B]">
+                  <span className="inline-flex items-center gap-0.5 font-medium text-[#0D0D0D]">
+                    <Star
+                      className="h-3.5 w-3.5 fill-[#FBBF24] text-[#FBBF24]"
+                      aria-hidden
+                    />
+                    5/5
+                  </span>
+                  <span aria-hidden>•</span>
+                  <span>{review.date}</span>
+                </div>
+                <p className="font-[var(--font-body)] mt-3 text-[15px] leading-relaxed text-[#0D0D0D]">
+                  {review.text}
+                </p>
+              </motion.article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* SECTION 7 — LOCALISATION */}
       <section ref={locationRef} className="w-full bg-[#F8F7F5] py-24">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 lg:grid-cols-2 lg:gap-10 lg:px-6">
@@ -574,7 +763,7 @@ export default function HomePageContent({ featuredCars }: { featuredCars: Car[] 
                   strokeWidth={1.75}
                 />
                 <span className="font-[var(--font-body)] text-[15px] text-[#6B6B6B]">
-                  Lun–Sam : 8h00–18h00 • Dim : 9h00–14h00
+                  Lun–Sam : {site.hours_weekday} • Dim : {site.hours_sunday}
                 </span>
               </li>
             </ul>

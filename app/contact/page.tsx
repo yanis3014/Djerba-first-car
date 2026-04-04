@@ -3,7 +3,7 @@ import Footer from "@/components/public/Footer";
 import Navbar from "@/components/public/Navbar";
 import { ContactForm } from "@/components/public/ContactForm";
 import { Card, CardTitle } from "@/components/ui/card";
-import { buildWhatsAppHref } from "@/lib/whatsapp";
+import { buildWhatsAppHref, DEFAULT_WHATSAPP_PREFILL } from "@/lib/whatsapp";
 import { SITE_NAME } from "@/lib/site";
 import { getSiteSettings } from "@/lib/site-settings";
 import { mapsEmbedUrlFromAddress, phoneDisplayToTelHref } from "@/lib/site-settings-utils";
@@ -21,7 +21,7 @@ export default async function ContactPage() {
   const settings = await getSiteSettings();
   const phone = settings.phone_display;
   const telHref = phoneDisplayToTelHref(phone);
-  const whatsapp = buildWhatsAppHref(settings.whatsapp_number);
+  const whatsapp = buildWhatsAppHref(settings.whatsapp_number, DEFAULT_WHATSAPP_PREFILL);
   const mapSrc = mapsEmbedUrlFromAddress(settings.address);
 
   return (
@@ -71,8 +71,10 @@ export default async function ContactPage() {
           </Card>
           <Card>
             <CardTitle>Horaires</CardTitle>
-            <p className="mt-3 text-[var(--color-muted)]">Lun - Sam : 08:30 - 18:30</p>
-            <p className="text-[var(--color-muted)]">Dimanche : fermeture partielle</p>
+            <p className="mt-3 text-[var(--color-muted)]">
+              Lun–Sam : {settings.hours_weekday}
+            </p>
+            <p className="text-[var(--color-muted)]">Dim : {settings.hours_sunday}</p>
           </Card>
           <div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)]">
             <iframe

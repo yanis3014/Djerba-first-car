@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useInView } from "framer-motion";
@@ -58,28 +58,33 @@ const SERVICES = [
   },
 ] as const;
 
-const PROCESS_STEPS = [
-  {
-    title: "Parcourez",
-    description:
-      "Explorez notre catalogue en ligne et repérez vos coups de cœur.",
-  },
-  {
-    title: "Contactez",
-    description:
-      "Appelez-nous ou écrivez sur WhatsApp. Réponse garantie le jour même.",
-  },
-  {
-    title: "Visitez",
-    description:
-      "Venez découvrir le véhicule sur place à Djerba, Route Midoun Km2.",
-  },
-  {
-    title: "Roulez",
-    description:
-      "Finalisez votre achat et prenez la route avec votre nouveau véhicule.",
-  },
-] as const;
+function useProcessSteps(address: string) {
+  return useMemo(
+    () =>
+      [
+        {
+          title: "Parcourez",
+          description:
+            "Explorez notre catalogue en ligne et repérez vos coups de cœur.",
+        },
+        {
+          title: "Contactez",
+          description:
+            "Appelez-nous ou écrivez sur WhatsApp. Réponse garantie le jour même.",
+        },
+        {
+          title: "Visitez",
+          description: `Venez découvrir le véhicule sur place — ${address}.`,
+        },
+        {
+          title: "Roulez",
+          description:
+            "Finalisez votre achat et prenez la route avec votre nouveau véhicule.",
+        },
+      ] as const,
+    [address],
+  );
+}
 
 function StatLightItem({
   target,
@@ -246,6 +251,7 @@ function ServiceSection({
 
 export function ServicesPageContent() {
   const site = useSiteSettings();
+  const processSteps = useProcessSteps(site.address);
   const statsRef = useRef<HTMLElement>(null);
   const statsInView = useInView(statsRef, { once: true, amount: 0.35 });
 
@@ -339,7 +345,7 @@ export function ServicesPageContent() {
 
             <div className="relative z-0 mt-14 md:mt-16">
               <div className="relative z-10 flex flex-col gap-12 md:flex-row md:items-start md:gap-0">
-                {PROCESS_STEPS.map((step, index) => (
+                {processSteps.map((step, index) => (
                   <Fragment key={step.title}>
                     <motion.div
                       initial={{ opacity: 0, y: 24 }}
@@ -369,7 +375,7 @@ export function ServicesPageContent() {
                         {step.description}
                       </p>
                     </motion.div>
-                    {index < PROCESS_STEPS.length - 1 && (
+                    {index < processSteps.length - 1 && (
                       <div
                         className="relative z-0 hidden h-[96px] flex-[0.35] items-start justify-center pt-[48px] md:flex"
                         aria-hidden
@@ -446,7 +452,7 @@ export function ServicesPageContent() {
               animate={ctaInView ? { opacity: 1 } : { opacity: 0 }}
               transition={{ duration: 0.45, delay: 0.2 }}
             >
-              {site.phone_display} • Lun–Sam 8h–18h
+              {site.phone_display} • Lun–Sam {site.hours_weekday}
             </motion.p>
           </div>
         </section>

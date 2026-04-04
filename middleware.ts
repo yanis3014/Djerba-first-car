@@ -20,6 +20,7 @@ export async function middleware(request: NextRequest) {
   });
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+    cookieOptions: { maxAge: 60 * 60 * 8 },
     cookies: {
       getAll() {
         return request.cookies.getAll();

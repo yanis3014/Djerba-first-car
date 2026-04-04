@@ -7,6 +7,7 @@ import { HoneypotField } from "@/components/public/HoneypotField";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/cn";
 
 export function ContactForm() {
   const [state, setState] = useState<ContactFormState | null>(null);
@@ -39,6 +40,26 @@ export function ContactForm() {
       <Input name="phone" type="tel" placeholder="Téléphone" autoComplete="tel" disabled={pending} />
       <Input name="email" type="email" placeholder="Email" autoComplete="email" disabled={pending} />
       <Input name="subject" placeholder="Sujet" disabled={pending} />
+      <div className="space-y-1.5">
+        <label htmlFor="contact-request-type" className="text-sm font-medium text-[var(--color-text)]">
+          Type de demande
+        </label>
+        <select
+          id="contact-request-type"
+          name="type"
+          disabled={pending}
+          defaultValue="info"
+          className={cn(
+            "w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2.5 text-sm text-[var(--color-text)] outline-none transition-colors duration-150 focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] disabled:cursor-not-allowed disabled:opacity-60",
+          )}
+        >
+          <option value="info">Renseignement général</option>
+          <option value="sell">Je veux vendre ma voiture</option>
+          <option value="exchange">Je veux faire un échange</option>
+          <option value="visit">Prendre rendez-vous</option>
+          <option value="other">Autre</option>
+        </select>
+      </div>
       <Textarea name="message" required rows={5} placeholder="Votre message" disabled={pending} />
       <Button type="submit" disabled={pending} className="w-full sm:w-auto">
         {pending ? "Envoi…" : "Envoyer"}

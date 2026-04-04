@@ -9,7 +9,7 @@ import {
 } from "framer-motion";
 import { useState } from "react";
 import { useSiteSettings } from "@/components/public/SiteSettingsProvider";
-import { buildWhatsAppHref } from "@/lib/whatsapp";
+import { buildWhatsAppHref, DEFAULT_WHATSAPP_PREFILL } from "@/lib/whatsapp";
 
 export default function WhatsAppFloatingButton() {
   const site = useSiteSettings();
@@ -23,7 +23,7 @@ export default function WhatsAppFloatingButton() {
   });
 
   const openWhatsApp = () => {
-    const href = buildWhatsAppHref(site.whatsapp_number);
+    const href = buildWhatsAppHref(site.whatsapp_number, DEFAULT_WHATSAPP_PREFILL);
     if (href === "#whatsapp") return;
     window.open(href, "_blank", "noopener,noreferrer");
   };

@@ -61,6 +61,21 @@ export default async function Footer() {
               s.facebook_label
             )}
           </p>
+          <p>
+            TikTok:{" "}
+            {s.tiktok_url ? (
+              <a
+                href={s.tiktok_url}
+                target="_blank"
+                rel="noreferrer"
+                className="text-[#cfcfcf] underline-offset-2 hover:underline"
+              >
+                {s.tiktok_label}
+              </a>
+            ) : (
+              s.tiktok_label
+            )}
+          </p>
         </div>
       </div>
       <div className="mx-auto max-w-6xl border-t border-[var(--color-border-dark)] px-4 pb-8 pt-4">

@@ -43,12 +43,25 @@ export interface Lead {
   created_at: string;
 }
 
+/** Valeurs du champ « Type de demande » (page contact / table messages). */
+export type MessageRequestType = "info" | "sell" | "exchange" | "visit" | "other";
+
+export const MESSAGE_REQUEST_LABELS: Record<MessageRequestType, string> = {
+  info: "Renseignement général",
+  sell: "Je veux vendre ma voiture",
+  exchange: "Je veux faire un échange",
+  visit: "Prendre rendez-vous",
+  other: "Autre",
+};
+
 export interface Message {
   id: string;
   name: string;
   phone?: string | null;
   email?: string | null;
   subject?: string | null;
+  /** Type de demande (défaut côté DB : info). */
+  type?: MessageRequestType | null;
   message: string;
   is_read: boolean;
   created_at: string;

@@ -1,4 +1,9 @@
+import { SITE_NAME } from "@/lib/site";
+
 const WHATSAPP_PLACEHOLDER = "#whatsapp";
+
+/** Message prérempli pour les liens WhatsApp généraux (navbar, contact, bulle, accueil). */
+export const DEFAULT_WHATSAPP_PREFILL = `Bonjour, je souhaite des informations sur ${SITE_NAME}.`;
 
 function digitsForWaMe(raw: string): string {
   let digits = raw.replace(/\D/g, "");

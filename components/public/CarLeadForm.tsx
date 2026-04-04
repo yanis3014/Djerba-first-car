@@ -9,9 +9,18 @@ import { buildWhatsAppHref } from "@/lib/whatsapp";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/cn";
 import type { Car } from "@/lib/types";
 
-export function CarLeadForm({ car }: { car: Car }) {
+export function CarLeadForm({
+  car,
+  hideHeading = false,
+  whatsappButtonClassName,
+}: {
+  car: Car;
+  hideHeading?: boolean;
+  whatsappButtonClassName?: string;
+}) {
   const site = useSiteSettings();
   const [state, setState] = useState<LeadFormState | null>(null);
   const [pending, startTransition] = useTransition();
@@ -20,9 +29,11 @@ export function CarLeadForm({ car }: { car: Car }) {
 
   return (
     <div>
-      <h2 className="text-lg font-semibold text-[var(--color-text)]">Je suis intéressé</h2>
+      {hideHeading ? null : (
+        <h2 className="font-[var(--font-body)] text-lg font-semibold text-[var(--color-text)]">Je suis intéressé</h2>
+      )}
       <form
-        className="relative mt-3 space-y-3"
+        className={cn("relative space-y-3", hideHeading ? "" : "mt-3")}
         action={(formData) => {
           startTransition(async () => {
             const result = await submitLeadForCar(undefined, formData);
@@ -52,7 +63,10 @@ export function CarLeadForm({ car }: { car: Car }) {
       </form>
       <a
         href={wa}
-        className="mt-3 block rounded-[var(--radius-md)] bg-[var(--color-surface-dark)] px-4 py-2.5 text-center text-sm text-white transition-colors hover:opacity-90"
+        className={cn(
+          "font-[var(--font-body)] mt-3 block w-full rounded-md bg-[#0D0D0D] px-4 py-3 text-center text-[14px] font-semibold text-white transition-colors hover:bg-[#1a1a1a]",
+          whatsappButtonClassName,
+        )}
         target="_blank"
         rel="noreferrer"
       >

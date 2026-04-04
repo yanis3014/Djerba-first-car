@@ -5,7 +5,48 @@ import { useEffect, useMemo, useState } from "react";
 import { markMessageAsRead } from "@/lib/admin/crm-actions";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
-import type { Message } from "@/lib/types";
+import { MESSAGE_REQUEST_LABELS, type Message, type MessageRequestType } from "@/lib/types";
+
+function isMessageRequestType(v: string): v is MessageRequestType {
+  return Object.prototype.hasOwnProperty.call(MESSAGE_REQUEST_LABELS, v);
+}
+
+function messageTypeLabel(type: string | null | undefined): string {
+  if (!type) return MESSAGE_REQUEST_LABELS.info;
+  if (isMessageRequestType(type)) return MESSAGE_REQUEST_LABELS[type];
+  return type;
+}
+
+const MESSAGE_TYPE_BADGE: Record<MessageRequestType, string> = {
+  info: "border border-sky-200/90 bg-sky-100 text-sky-900",
+  sell: "border border-emerald-200/90 bg-emerald-100 text-emerald-900",
+  exchange: "border border-amber-200/90 bg-amber-100 text-amber-900",
+  visit: "border border-violet-200/90 bg-violet-100 text-violet-900",
+  other: "border border-neutral-300/90 bg-neutral-200 text-neutral-800",
+};
+
+function messageTypeBadgeKey(raw: string | null | undefined): MessageRequestType {
+  if (raw && isMessageRequestType(raw)) return raw;
+  if (raw?.trim()) return "other";
+  return "info";
+}
+
+function MessageTypeBadge({ type }: { type: string | null | undefined }) {
+  const key = messageTypeBadgeKey(type);
+  const label = messageTypeLabel(type);
+  const color = MESSAGE_TYPE_BADGE[key] ?? MESSAGE_TYPE_BADGE.info;
+  return (
+    <span
+      className={cn(
+        "inline-flex max-w-full shrink-0 items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold leading-tight tracking-wide",
+        color,
+      )}
+      title={label}
+    >
+      {label}
+    </span>
+  );
+}
 
 function formatMessageDate(iso: string) {
   try {
@@ -119,6 +160,9 @@ export function MessagesInbox({ messages }: { messages: Message[] }) {
                       {formatListDate(msg.created_at)}
                     </time>
                   </div>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <MessageTypeBadge type={msg.type} />
+                  </div>
                   <p className="line-clamp-2 text-sm text-[var(--color-muted)]">{previewText(msg.message)}</p>
                   {!msg.is_read ? (
                     <span className="w-fit rounded-full bg-[var(--color-accent)]/15 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[var(--color-accent)]">
@@ -140,7 +184,10 @@ export function MessagesInbox({ messages }: { messages: Message[] }) {
           <>
             <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--color-border)] px-5 py-4">
               <div className="min-w-0">
-                <h2 className="font-[var(--font-display)] text-xl text-[var(--color-text)]">{selected.name}</h2>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="font-[var(--font-display)] text-xl text-[var(--color-text)]">{selected.name}</h2>
+                  <MessageTypeBadge type={selected.type} />
+                </div>
                 <time className="mt-1 block text-xs text-[var(--color-muted)]" dateTime={selected.created_at}>
                   {formatMessageDate(selected.created_at)}
                 </time>

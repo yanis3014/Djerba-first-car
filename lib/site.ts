@@ -10,5 +10,5 @@ export const SITE_DESCRIPTION =
 
 /** Affichage téléphone (variable publique pour le client). */
 export function getPublicPhoneDisplay(): string {
-  return process.env.NEXT_PUBLIC_PHONE_DISPLAY ?? "+216 XX XXX XXX";
+  return process.env.NEXT_PUBLIC_PHONE_DISPLAY ?? "+216 53 145 000";
 }
