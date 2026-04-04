@@ -6,6 +6,7 @@ import ScrollVideoHero from "@/components/public/ScrollVideoHero";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getAllCars } from "@/lib/cars";
 import { organizationJsonLd } from "@/lib/seo/json-ld";
+import { getSiteSettings } from "@/lib/site-settings";
 import { SITE_DESCRIPTION, SITE_NAME } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -20,10 +21,11 @@ export const metadata: Metadata = {
 export default async function Home() {
   const cars = await getAllCars();
   const featuredCars = cars.filter((car) => car.is_featured).slice(0, 3);
+  const siteSettings = await getSiteSettings();
 
   return (
     <>
-      <JsonLd data={organizationJsonLd()} />
+      <JsonLd data={organizationJsonLd(siteSettings)} />
       <div className="flex min-h-screen flex-col">
         <Navbar />
         <main className="flex-1">

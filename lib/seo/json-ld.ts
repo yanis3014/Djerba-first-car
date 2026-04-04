@@ -1,6 +1,7 @@
+import type { SiteSettings } from "@/lib/site-settings-types";
 import { getSiteUrl } from "@/lib/site";
 
-export function organizationJsonLd(): Record<string, unknown> {
+export function organizationJsonLd(settings: SiteSettings): Record<string, unknown> {
   const url = getSiteUrl();
   return {
     "@context": "https://schema.org",
@@ -10,6 +11,7 @@ export function organizationJsonLd(): Record<string, unknown> {
     description: "Vente, achat et échange de véhicules premium à Djerba.",
     address: {
       "@type": "PostalAddress",
+      streetAddress: settings.address,
       addressLocality: "Houmt Souk",
       addressRegion: "Médenine",
       addressCountry: "TN",

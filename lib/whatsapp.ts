@@ -1,16 +1,40 @@
-/**
- * Lien WhatsApp (numéro international sans + dans l’URL).
- * `NEXT_PUBLIC_WHATSAPP_NUMBER` peut contenir des espaces ou le préfixe +216.
- */
-export function getWhatsAppHref(prefilledMessage?: string): string {
-  const raw = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "";
-  const digits = raw.replace(/\D/g, "");
+const WHATSAPP_PLACEHOLDER = "#whatsapp";
+
+function digitsForWaMe(raw: string): string {
+  let digits = raw.replace(/\D/g, "");
+  if (digits.startsWith("00")) {
+    digits = digits.slice(2);
+  }
+  return digits;
+}
+
+/** Construit un lien `wa.me` à partir d’un numéro brut (indicatif inclus). */
+export function buildWhatsAppHref(rawNumber: string, prefillMessage?: string): string {
+  const raw = rawNumber.trim();
+  if (!raw) {
+    return WHATSAPP_PLACEHOLDER;
+  }
+  const digits = digitsForWaMe(raw);
   if (!digits) {
-    return "#whatsapp";
+    return WHATSAPP_PLACEHOLDER;
   }
   const base = `https://wa.me/${digits}`;
-  if (prefilledMessage?.trim()) {
-    return `${base}?text=${encodeURIComponent(prefilledMessage.trim())}`;
+  if (prefillMessage?.trim()) {
+    return `${base}?text=${encodeURIComponent(prefillMessage.trim())}`;
   }
   return base;
+}
+
+/** Lien WhatsApp à partir de la variable d’environnement uniquement. */
+export function getWhatsAppHref(prefillMessage?: string): string {
+  return buildWhatsAppHref(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.trim() ?? "", prefillMessage);
+}
+
+/** Lien WhatsApp Web (`wa.me`) à partir d’un numéro saisi (chiffres conservés, préfixe 00 retiré). */
+export function whatsAppWebUrl(phone: string): string {
+  const digits = digitsForWaMe(phone);
+  if (!digits) {
+    return "https://wa.me/";
+  }
+  return `https://wa.me/${digits}`;
 }

@@ -4,7 +4,10 @@ import { createSupabaseServerClient } from "@/lib/supabase";
 async function countLeads(): Promise<number> {
   try {
     const supabase = createSupabaseServerClient();
-    const { count, error } = await supabase.from("leads").select("id", { count: "exact", head: true });
+    const { count, error } = await supabase
+      .from("leads")
+      .select("id", { count: "exact", head: true })
+      .eq("archived", false);
     if (error) return 0;
     return count ?? 0;
   } catch {

@@ -43,6 +43,7 @@ create table if not exists public.leads (
   type text not null default 'info',
   status text not null default 'new',
   source text not null default 'website',
+  archived boolean not null default false,
   created_at timestamptz not null default now()
 );
 

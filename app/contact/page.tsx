@@ -3,8 +3,10 @@ import Footer from "@/components/public/Footer";
 import Navbar from "@/components/public/Navbar";
 import { ContactForm } from "@/components/public/ContactForm";
 import { Card, CardTitle } from "@/components/ui/card";
-import { getWhatsAppHref } from "@/lib/whatsapp";
-import { getPublicPhoneDisplay, SITE_NAME } from "@/lib/site";
+import { buildWhatsAppHref } from "@/lib/whatsapp";
+import { SITE_NAME } from "@/lib/site";
+import { getSiteSettings } from "@/lib/site-settings";
+import { mapsEmbedUrlFromAddress, phoneDisplayToTelHref } from "@/lib/site-settings-utils";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -15,9 +17,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ContactPage() {
-  const phone = getPublicPhoneDisplay();
-  const whatsapp = getWhatsAppHref();
+export default async function ContactPage() {
+  const settings = await getSiteSettings();
+  const phone = settings.phone_display;
+  const telHref = phoneDisplayToTelHref(phone);
+  const whatsapp = buildWhatsAppHref(settings.whatsapp_number);
+  const mapSrc = mapsEmbedUrlFromAddress(settings.address);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -39,13 +44,24 @@ export default function ContactPage() {
         <section className="space-y-4">
           <Card>
             <CardTitle>Informations</CardTitle>
-            <p className="mt-3 text-[var(--color-muted)]">Djerba Houmt Essouk, Route Midoun Km2</p>
+            <p className="mt-3 text-[var(--color-muted)]">{settings.address}</p>
             <p className="text-[var(--color-muted)]">
               Téléphone :{" "}
-              <a href={`tel:${phone.replace(/\s/g, "")}`} className="text-[var(--color-accent)] hover:underline">
+              <a href={telHref} className="text-[var(--color-accent)] hover:underline">
                 {phone}
               </a>
             </p>
+            {settings.contact_email ? (
+              <p className="text-[var(--color-muted)]">
+                Email :{" "}
+                <a
+                  href={`mailto:${settings.contact_email}`}
+                  className="text-[var(--color-accent)] hover:underline"
+                >
+                  {settings.contact_email}
+                </a>
+              </p>
+            ) : null}
             <p className="text-[var(--color-muted)]">
               WhatsApp :{" "}
               <a href={whatsapp} className="text-[var(--color-accent)] hover:underline" target="_blank" rel="noreferrer">
@@ -61,7 +77,7 @@ export default function ContactPage() {
           <div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)]">
             <iframe
               title="Djerba First Car - localisation"
-              src="https://maps.google.com/maps?q=Djerba%20Houmt%20Souk&t=&z=13&ie=UTF8&iwloc=&output=embed"
+              src={mapSrc}
               className="h-64 w-full"
               loading="lazy"
             />

@@ -39,6 +39,7 @@ export interface Lead {
   type: "buy" | "sell" | "exchange" | "info";
   status: "new" | "contacted" | "closed";
   source: string;
+  archived: boolean;
   created_at: string;
 }
 

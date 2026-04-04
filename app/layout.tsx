@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Outfit } from "next/font/google";
 import "./globals.css";
+import { SiteSettingsProvider } from "@/components/public/SiteSettingsProvider";
+import { getSiteSettings } from "@/lib/site-settings";
 import { getSiteUrl, SITE_DESCRIPTION, SITE_NAME } from "@/lib/site";
 
 const cormorant = Cormorant_Garamond({
@@ -43,18 +45,20 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const siteSettings = await getSiteSettings();
+
   return (
     <html
       lang="fr"
       className={`${cormorant.variable} ${outfit.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[var(--color-bg)] text-[var(--color-text)]">
-        {children}
+        <SiteSettingsProvider value={siteSettings}>{children}</SiteSettingsProvider>
       </body>
     </html>
   );

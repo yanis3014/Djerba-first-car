@@ -8,9 +8,11 @@ import {
   useTransform,
 } from "framer-motion";
 import { useState } from "react";
-import { getWhatsAppHref } from "@/lib/whatsapp";
+import { useSiteSettings } from "@/components/public/SiteSettingsProvider";
+import { buildWhatsAppHref } from "@/lib/whatsapp";
 
 export default function WhatsAppFloatingButton() {
+  const site = useSiteSettings();
   const { scrollY } = useScroll();
   const opacity = useTransform(scrollY, [0, 280, 320], [0, 0, 1]);
   const [hovered, setHovered] = useState(false);
@@ -21,7 +23,7 @@ export default function WhatsAppFloatingButton() {
   });
 
   const openWhatsApp = () => {
-    const href = getWhatsAppHref();
+    const href = buildWhatsAppHref(site.whatsapp_number);
     if (href === "#whatsapp") return;
     window.open(href, "_blank", "noopener,noreferrer");
   };

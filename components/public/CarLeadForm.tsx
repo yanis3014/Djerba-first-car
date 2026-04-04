@@ -4,17 +4,19 @@ import { useState, useTransition } from "react";
 import type { LeadFormState } from "@/lib/actions/lead";
 import { submitLeadForCar } from "@/lib/actions/lead";
 import { HoneypotField } from "@/components/public/HoneypotField";
-import { getWhatsAppHref } from "@/lib/whatsapp";
+import { useSiteSettings } from "@/components/public/SiteSettingsProvider";
+import { buildWhatsAppHref } from "@/lib/whatsapp";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { Car } from "@/lib/types";
 
 export function CarLeadForm({ car }: { car: Car }) {
+  const site = useSiteSettings();
   const [state, setState] = useState<LeadFormState | null>(null);
   const [pending, startTransition] = useTransition();
   const defaultMsg = `Bonjour, je suis intéressé par la ${car.brand} ${car.model}.`;
-  const wa = getWhatsAppHref(defaultMsg);
+  const wa = buildWhatsAppHref(site.whatsapp_number, defaultMsg);
 
   return (
     <div>

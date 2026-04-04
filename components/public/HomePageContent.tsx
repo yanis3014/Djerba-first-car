@@ -11,19 +11,13 @@ import {
 import { motion, useInView } from "framer-motion";
 import type { Car } from "@/lib/types";
 import CarCard from "@/components/public/CarCard";
-import { getWhatsAppHref } from "@/lib/whatsapp";
-
-const MAPS_EMBED_SRC =
-  "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3313.5!2d10.8505!3d33.8833!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzPCsDUyJzU5LjkiTiAxMMKwNTEnMDEuOCJF!5e0!3m2!1sfr!2stn!4v1234567890";
-
-const MAPS_DIRECTIONS_HREF =
-  "https://www.google.com/maps/dir/?api=1&destination=Djerba+Houmt+Essouk%2C+Route+Midoun+Km+2";
-
-function openWhatsApp() {
-  const href = getWhatsAppHref();
-  if (href === "#whatsapp") return;
-  window.open(href, "_blank", "noopener,noreferrer");
-}
+import { useSiteSettings } from "@/components/public/SiteSettingsProvider";
+import {
+  mapsDirectionsUrlFromAddress,
+  mapsEmbedUrlFromAddress,
+  phoneDisplayToTelHref,
+} from "@/lib/site-settings-utils";
+import { buildWhatsAppHref } from "@/lib/whatsapp";
 
 function StatItem({
   target,
@@ -87,6 +81,14 @@ function StatItem({
 }
 
 export default function HomePageContent({ featuredCars }: { featuredCars: Car[] }) {
+  const site = useSiteSettings();
+
+  const openWhatsApp = () => {
+    const href = buildWhatsAppHref(site.whatsapp_number);
+    if (href === "#whatsapp") return;
+    window.open(href, "_blank", "noopener,noreferrer");
+  };
+
   const statsRef = useRef<HTMLElement>(null);
   const statsInView = useInView(statsRef, { once: true, amount: 0.35 });
 
@@ -165,8 +167,7 @@ export default function HomePageContent({ featuredCars }: { featuredCars: Car[] 
     },
     {
       title: "Visitez",
-      description:
-        "Venez découvrir le véhicule sur place à Djerba, Route Midoun Km2.",
+      description: `Venez découvrir le véhicule sur place — ${site.address}.`,
     },
     {
       title: "Roulez",
@@ -175,7 +176,10 @@ export default function HomePageContent({ featuredCars }: { featuredCars: Car[] 
     },
   ];
 
-  const waHref = getWhatsAppHref();
+  const waHref = buildWhatsAppHref(site.whatsapp_number);
+  const mapsDirectionsHref = mapsDirectionsUrlFromAddress(site.address);
+  const mapsEmbedSrc = mapsEmbedUrlFromAddress(site.address);
+  const telHref = phoneDisplayToTelHref(site.phone_display);
 
   return (
     <>
@@ -536,7 +540,7 @@ export default function HomePageContent({ featuredCars }: { featuredCars: Car[] 
                   strokeWidth={1.75}
                 />
                 <span className="font-[var(--font-body)] text-[15px] text-[#0D0D0D]">
-                  Djerba Houmt Essouk, Route Midoun Km2
+                  {site.address}
                 </span>
               </li>
               <li className="flex gap-3">
@@ -545,10 +549,10 @@ export default function HomePageContent({ featuredCars }: { featuredCars: Car[] 
                   strokeWidth={1.75}
                 />
                 <a
-                  href="tel:+21600000000"
+                  href={telHref}
                   className="font-[var(--font-body)] text-[15px] text-[#0D0D0D] underline-offset-2 hover:underline"
                 >
-                  +216 XX XXX XXX
+                  {site.phone_display}
                 </a>
               </li>
               <li className="flex gap-3">
@@ -576,7 +580,7 @@ export default function HomePageContent({ featuredCars }: { featuredCars: Car[] 
             </ul>
 
             <a
-              href={MAPS_DIRECTIONS_HREF}
+              href={mapsDirectionsHref}
               target="_blank"
               rel="noopener noreferrer"
               className="font-[var(--font-body)] mt-8 inline-flex w-full items-center justify-center rounded-md bg-[#CC1414] px-6 py-3 text-[15px] font-semibold text-white transition hover:bg-[#a80f0f]"
@@ -595,7 +599,7 @@ export default function HomePageContent({ featuredCars }: { featuredCars: Car[] 
           >
             <iframe
               title="Carte — Djerba First Car"
-              src={MAPS_EMBED_SRC}
+              src={mapsEmbedSrc}
               className="h-full min-h-[450px] w-full border-0"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"

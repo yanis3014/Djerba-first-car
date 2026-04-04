@@ -5,8 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, useInView } from "framer-motion";
 
-import Footer from "@/components/public/Footer";
-import Navbar from "@/components/public/Navbar";
+import { useSiteSettings } from "@/components/public/SiteSettingsProvider";
 
 const SERVICES = [
   {
@@ -246,6 +245,7 @@ function ServiceSection({
 }
 
 export function ServicesPageContent() {
+  const site = useSiteSettings();
   const statsRef = useRef<HTMLElement>(null);
   const statsInView = useInView(statsRef, { once: true, amount: 0.35 });
 
@@ -256,9 +256,7 @@ export function ServicesPageContent() {
   const ctaInView = useInView(ctaRef, { once: true, amount: 0.35 });
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
-      <Navbar />
-      <main className="flex-1">
+    <main className="flex-1 bg-white">
         {/* SECTION 1 — HERO */}
         <header className="flex h-[320px] w-full flex-col items-center justify-center bg-[#111111] px-4 text-center">
           <p className="font-[var(--font-body)] text-[11px] font-medium uppercase tracking-[0.3em] text-[#CC1414]">
@@ -448,12 +446,10 @@ export function ServicesPageContent() {
               animate={ctaInView ? { opacity: 1 } : { opacity: 0 }}
               transition={{ duration: 0.45, delay: 0.2 }}
             >
-              +216 XX XXX XXX • Lun–Sam 8h–18h
+              {site.phone_display} • Lun–Sam 8h–18h
             </motion.p>
           </div>
         </section>
-      </main>
-      <Footer />
-    </div>
+    </main>
   );
 }

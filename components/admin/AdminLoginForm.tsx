@@ -1,37 +1,39 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
+import { toast } from "sonner";
+import { AdminToaster } from "@/components/admin/AdminToaster";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 export function AdminLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") ?? "/admin/dashboard";
-  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   return (
-    <form
-      className="space-y-4"
-      onSubmit={(e) => {
-        e.preventDefault();
-        const fd = new FormData(e.currentTarget);
-        const email = fd.get("email")?.toString() ?? "";
-        const password = fd.get("password")?.toString() ?? "";
-        setError(null);
-        startTransition(async () => {
-          const supabase = createSupabaseBrowserClient();
-          const { error: signError } = await supabase.auth.signInWithPassword({ email, password });
-          if (signError) {
-            setError(signError.message);
-            return;
-          }
-          router.replace(redirectTo);
-          router.refresh();
-        });
-      }}
-    >
+    <>
+      <AdminToaster />
+      <form
+        className="space-y-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const fd = new FormData(e.currentTarget);
+          const email = fd.get("email")?.toString() ?? "";
+          const password = fd.get("password")?.toString() ?? "";
+          startTransition(async () => {
+            const supabase = createSupabaseBrowserClient();
+            const { error: signError } = await supabase.auth.signInWithPassword({ email, password });
+            if (signError) {
+              toast.error("Erreur de connexion", { description: signError.message });
+              return;
+            }
+            router.replace(redirectTo);
+            router.refresh();
+          });
+        }}
+      >
       <div>
         <label htmlFor="admin-email" className="mb-1 block text-sm font-medium text-[var(--color-text)]">
           Email
@@ -58,7 +60,6 @@ export function AdminLoginForm() {
           className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2.5 text-sm"
         />
       </div>
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
       <button
         type="submit"
         disabled={pending}
@@ -67,5 +68,6 @@ export function AdminLoginForm() {
         {pending ? "Connexion…" : "Se connecter"}
       </button>
     </form>
+    </>
   );
 }
